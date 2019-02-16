@@ -1,0 +1,13 @@
+databaseChangeLog:
+ - changeSet:
+    id: 34
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: code
+            type: varchar(255)
+        schemaName: 
+        tableName: shipment        

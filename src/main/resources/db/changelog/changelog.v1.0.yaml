@@ -1,0 +1,724 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: David
+      changes:
+        - createTable:
+            tableName: transporter_type
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+             
+                  
+ 
+  - changeSet:
+        id: 2
+        author: David
+        changes:
+         - createTable:
+            tableName: transporter
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: type
+                  type: int
+                  constraints:
+                    nullable: false 
+              - column:
+                  name: logo
+                  type: varchar(100)
+              - column:
+                  name: address
+                  type: int   
+                  constraints:
+                    nullable: false 
+              - column:
+                  name: status
+                  type: int   
+                  constraints:
+                    nullable: false       
+                    
+                    
+  - changeSet:
+        id: 3
+        author: David
+        changes: 
+          - createTable:
+              tableName: shipment_status
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false  
+  - changeSet:
+        id: 4
+        author: David
+        changes: 
+          - createTable:
+              tableName: transporter_status
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(45)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false                     
+              
+  - changeSet:
+      id: 5
+      author: David
+      changes: 
+          - createTable:
+              tableName: apps_countries
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: country_code
+                  type: varchar(2)
+                  constraints:
+                    nullable: false 
+              - column:
+                  name: country_name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false       
+   
+  - changeSet:
+      id: 6
+      author: David
+      changes: 
+          - createTable:
+              tableName: shipment
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: transaction
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(255)
+              - column:
+                  name: transporter
+                  type: int
+                  constraints:
+                      nullable: true
+              - column:
+                  name: shipment_date
+                  type: datetime
+                  constraints:
+                      nullable: false
+              - column:
+                  name: shipment_weight
+                  type: double
+                  
+              - column:
+                  name: freight
+                  type: varchar(255)
+                  
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: address
+                  type: varchar(1000)
+              - column:
+                  name: city
+                  type: varchar(255) 
+              - column:
+                  name: region
+                  type: varchar(255)  
+              - column:
+                  name: postalcode
+                  type: varchar(15)  
+              - column:
+                  name: country
+                  type: int
+                  constraints:
+                      nullable: false
+              - column:
+                  name: status
+                  type: int
+                  constraints:
+                      nullable: false
+              - column:
+                  name: created_by
+                  type: int
+                  constraints:
+                      nullable: false 
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: delivered_date
+                  type: datetime
+              - column:
+                  name: date_last_updated
+                  type: datetime
+              - column:
+                  name: date_deleted
+                  type: datetime    
+                          
+                    
+  - changeSet:
+      id: 7
+      author: David
+      changes: 
+          - createTable:
+              tableName: shipment_item
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: shipment
+                  type: int
+              - column:
+                  name: product
+                  type: int
+              - column:
+                  name: quantity
+                  type: double    
+                  
+              - column:
+                  name: order_item
+                  type: int
+                  
+              
+                  
+  - changeSet:
+      id: 8
+      author: David
+      changes:
+        - createTable:
+            tableName: shipment_transaction
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false      
+  
+  - changeSet:
+      id: 9
+      author: David
+      changes:
+        - createTable:
+            tableName: provider
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false  
+  - changeSet:
+      id: 10
+      author: David
+      changes:
+        - createTable:
+            tableName: retailer
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+              - column:
+                  name: logical_name
+                  type: varchar(255)    
+                                       
+  - changeSet:
+      id: 11
+      author: David
+      changes:
+        - createTable:
+            tableName: provider_transporter
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: provider
+                  type: int
+              - column:
+                  name: transporter
+                  type: int 
+  - changeSet:
+      id: 12
+      author: David
+      changes: 
+          - createTable:
+              tableName: transporter_address
+              columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: address
+                  type: varchar(100)
+                  
+              - column:
+                  name: city
+                  type: varchar(100)
+              - column:
+                  name: email
+                  type: varchar(100)    
+                  
+              - column:
+                  name: region
+                  type: varchar(100)
+                  
+              - column:
+                  name: postalcode
+                  type: int
+                  
+              - column:
+                  name: country
+                  type: int
+                  constraints:
+                    nullable: false
+                  
+              - column:
+                  name: phone
+                  type: varchar(100)
+                  
+              - column:
+                  name: fax
+                  type: varchar(100)
+                  
+              - column:
+                  name: url
+                  type: varchar(100)                   
+  - changeSet:
+      id: 13
+      author: David
+      changes:
+        - createTable:
+            tableName: product
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  
+              - column:
+                  name: code
+                  type: varchar(255)
+              - column:
+                  name: description
+                  type: varchar(500)
+  - changeSet:
+      id: 14
+      author: David
+      changes:
+        - createTable:
+            tableName: order_item
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: order_tbl
+                  type: int
+                  
+              - column:
+                  name: product
+                  type: int
+              - column:
+                  name: quantity
+                  type: double  
+              - column:
+                  name: unit_price
+                  type: double 
+  - changeSet:
+      id: 15
+      author: David
+      changes:
+        - createTable:
+            tableName: order_tbl
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: retailer
+                  type: int
+                  
+              - column:
+                  name: provider
+                  type: int
+              - column:
+                  name: order_date
+                  type: datetime  
+              - column:
+                  name: required_date
+                  type: datetime                 
+                      
+  - changeSet:
+      id: 16
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: type
+            baseTableName: transporter
+            constraintName: fk_transporter_transporter_type  
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter_type  
+            
+  - changeSet:
+      id: 17
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: transporter
+            constraintName: fk_transporter_transporter_status
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter_status 
+            
+  - changeSet:
+      id: 18
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: shipment
+            constraintName: fk_shipment_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter
+  - changeSet:
+      id: 19
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: shipment
+            constraintName: fk_shipment_shipment_status  
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment_status 
+            
+  - changeSet:
+      id: 20
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: country
+            baseTableName: shipment
+            constraintName: fk_shipment_apps_countries 
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: apps_countries  
+            
+  - changeSet:
+      id: 21
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: shipment
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_shipment 
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment             
+        
+  - changeSet:
+      id: 22
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transaction
+            baseTableName: shipment
+            constraintName: fk_shipment_transaction
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment_transaction  
+            
+  - changeSet:
+      id: 23
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: created_by
+            baseTableName: shipment
+            constraintName: fk_shipment_provider
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: provider            
+            
+  - changeSet:
+      id: 24
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: address
+            baseTableName: transporter
+            constraintName: fk_transporter_transporter_address
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter_address    
+  
+  - changeSet:
+      id: 25
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: country
+            baseTableName: transporter_address
+            constraintName: fk_transporter_address_address_apps_countries
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: apps_countries   
+  - changeSet:
+      id: 26
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: product
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_product
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: product 
+  - changeSet:
+      id: 27
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: product
+            baseTableName: order_item
+            constraintName: fk_order_item_product
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: product    
+  - changeSet:
+      id: 28
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: order_item
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_order_item
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: order_item    
+  - changeSet:
+      id: 29
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: order_tbl
+            baseTableName: order_item
+            constraintName: fk_order_item_order
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: order_tbl    
+  - changeSet:
+      id: 30
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider
+            baseTableName: order_tbl
+            constraintName: fk_order_provider
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: provider  
+  - changeSet:
+      id: 31
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: retailer
+            baseTableName: order_tbl
+            constraintName: fk_order_retailer
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: retailer   
+  - changeSet:
+      id: 32
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider
+            baseTableName: provider_transporter
+            constraintName: fk_provider_transporter_provider
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: provider   
+  - changeSet:
+      id: 33
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: provider_transporter
+            constraintName: fk_provider_transporter_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter          
