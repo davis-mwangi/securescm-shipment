@@ -6,8 +6,6 @@
 package com.securescm.shipment.entities;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,10 +21,11 @@ import lombok.NoArgsConstructor;
 @Entity
 public class Provider {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
    
     private String name;
+    
+    private String code;
 
     public Provider(int id) {
         this.id =id;

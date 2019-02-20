@@ -28,9 +28,6 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
-    private String code;
-    
     private String name;
 
     public Transaction(int transaction) {

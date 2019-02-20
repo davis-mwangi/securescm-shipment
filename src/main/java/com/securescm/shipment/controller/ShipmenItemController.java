@@ -9,7 +9,10 @@ import com.securescm.shipment.entities.OrderItem;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.model.ShipmentItemModel;
 import com.securescm.shipment.payload.ShipmentItemRequest;
+import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
+import com.securescm.shipment.security.ApiPrincipal;
+import com.securescm.shipment.security.CurrentUser;
 import com.securescm.shipment.service.ShipmentItemService;
 import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.PagedResponse;
@@ -41,6 +44,9 @@ public class ShipmenItemController {
    
    @Autowired
    private ShipmentItemDao shipmentItemDao;
+   
+   @Autowired
+   private ShipmentDao shipmentDao;
  
    
    @PostMapping
@@ -48,9 +54,17 @@ public class ShipmenItemController {
         
         boolean exists =  shipmentItemDao.existsByShipmentAndOrderItem(new Shipment(
                 request.getShipment()), new OrderItem(request.getOrderItem()));
+        
+        Shipment shipment =  shipmentDao.getOneShipment(request.getShipment());
+         
+        if(shipment.getStatus().getCode().equals("106")){
+            return ResponseEntity.ok().body(new SingleItemResponse(Response.SHIPMENT_CLOSED.status(), null));
+        }
+         
         if(exists){
            return ResponseEntity.status(HttpStatus.CONFLICT).body(new SingleItemResponse(Response.SHIPMENT_ITEM_ALREADY_ADDED.status(), null));
         }
+        
         return ResponseEntity.ok().body(shipmentItemService.createUpdateShipmentItem(request));
     }
     
@@ -76,8 +90,9 @@ public class ShipmenItemController {
             @RequestParam(value = "direction", defaultValue = AppConstants.DEFAULT_ORDER_DIRECTION) String direction,
             @RequestParam(value = "oderBy", defaultValue = AppConstants.DEFAULT_ORDER_BY)  String orderBy,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size){
-       return shipmentItemService.getAllShipmentItems(direction, orderBy, page, size);
+            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @CurrentUser ApiPrincipal apiPricipal){
+       return shipmentItemService.getAllShipmentItems(apiPricipal.getUser(),direction, orderBy, page, size);
     }
     
       
@@ -92,5 +107,12 @@ public class ShipmenItemController {
    @DeleteMapping("/{id}")
     public ResponseEntity deleteShipmentItem(@PathVariable("id") Integer id){     
         return ResponseEntity.ok().body(shipmentItemService.deleteShipmentItem(id));
+    }
+    
+    @GetMapping("/ordered")
+    public ResponseEntity getAllOrdered(@CurrentUser ApiPrincipal apiPrincipal){
+        //Integer id = 1;
+        return ResponseEntity.ok().body(shipmentItemService.getAllOrderedItems(apiPrincipal.getUser()));
+   
     }
 }

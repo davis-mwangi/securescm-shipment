@@ -27,7 +27,7 @@ public class ShipmentItemModel {
 
     private Product product;
 
-    private ShipItem shipment;
+    private ShipCustom shipment;
 
     private double quantity;
 
@@ -44,7 +44,7 @@ public class ShipmentItemModel {
         model.setId(sim.getId());
         model.setProduct(sim.getProduct());
         model.setQuantity(sim.getQuantity());
-        model.setShipment(new ShipItem(
+        model.setShipment(new ShipCustom(
                 sim.getShipment().getId(),
                 sim.getShipment().getCode(),
                 sim.getShipment().getName(),
@@ -54,7 +54,6 @@ public class ShipmentItemModel {
                 sim.getShipment().getShipmentDate()));
         
         model.setRetailer(sim.getOrderItem().getOrder().getRetailer());
-        model.setProvider(sim.getOrderItem().getOrder().getProvider());
         model.setOrderDate(sim.getOrderItem().getOrder().getOrderDate());
         model.setOrderRequiredDate(sim.getOrderItem().getOrder().getRequiredDate());
 

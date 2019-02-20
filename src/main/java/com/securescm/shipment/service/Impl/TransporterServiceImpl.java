@@ -15,6 +15,7 @@ import com.securescm.shipment.model.ItemName;
 import com.securescm.shipment.model.TransporterModel;
 import com.securescm.shipment.payload.TransporterRequest;
 import com.securescm.shipment.model.Status;
+import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ProviderTransporterRequest;
 import com.securescm.shipment.repos.AddressDao;
 import com.securescm.shipment.repos.ProviderTransporterDao;
@@ -162,12 +163,12 @@ public class TransporterServiceImpl implements TransporterService {
     /////////////////////////////PROVIDER TRANSPORTERS //////////////////////////
 
     @Override
-    public SingleItemResponse createProviderTransporter(ProviderTransporterRequest request) {
+    public SingleItemResponse createProviderTransporter(UserModel userModel, ProviderTransporterRequest request) {
         ProviderTransporter pt = new ProviderTransporter();
         if(request.getId() != null){
           pt =  providerTransporterDao.findProviderTransporter(request.getId());
         }
-        pt.setProvider(new Provider(request.getProvider()));
+        pt.setProvider(new Provider(userModel.getStakeholder().getId()));
         pt.setTransporter(new Transporter(request.getTransporter()));      
         providerTransporterDao.save(pt);
       return  new  SingleItemResponse(Response.SUCCESS.status(), new ItemName(pt.getId(),null));
@@ -226,7 +227,7 @@ public class TransporterServiceImpl implements TransporterService {
     //////////////////////GET ALL TRANSPORTERS FOR A GIVEN PROVIDER ///////////
 
     @Override
-    public PagedResponse<ProviderTransporter> getAllTransportersForProvider(Integer providerId, 
+    public PagedResponse<ProviderTransporter> getAllTransportersForProvider(UserModel userModel, 
             String direction, String orderBy, int page, int size) {
          Status status = null;
         Sort sort = null;
@@ -240,7 +241,7 @@ public class TransporterServiceImpl implements TransporterService {
         Pageable pageable = PageRequest.of(page, size, sort);
 
   
-        Page<ProviderTransporter> pts = providerTransporterDao.findAllByProvider(new Provider(providerId), pageable);
+        Page<ProviderTransporter> pts = providerTransporterDao.findAllByProvider(new Provider(userModel.getStakeholder().getId()), pageable);
 
         if (pts.getNumberOfElements() == 0) {
             return new PagedResponse<>(Response.SUCCESS.status(), Collections.emptyList(), pts.getNumber(),
@@ -256,6 +257,8 @@ public class TransporterServiceImpl implements TransporterService {
         return new PagedResponse<>(Response.SUCCESS.status(), ptsResponses, pts.getNumber(),
                 pts.getSize(), pts.getTotalElements(), pts.getTotalPages(), pts.isLast());
     }
+
+   
     
     
 }

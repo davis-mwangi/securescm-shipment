@@ -15,6 +15,8 @@ public interface AppConstants {
     int ACCEPTED = 2;
     int REJECTED = 3;
     int DELIVERED = 4;
+    int OPEN = 5;
+    int CLOSED = 6;
   
     // Pagination default settings
     String DEFAULT_ORDER_DIRECTION = "ASC";

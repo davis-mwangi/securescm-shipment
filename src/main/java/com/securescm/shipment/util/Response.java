@@ -29,7 +29,9 @@ public enum Response {
     SHIPMENT_ITEM_ALREADY_ADDED(13, "Shippment item already exists"),
     
     PROVIDER_TRANSPORTER_NOT_FOUND(14, "Provider transporter not found"),
-    PROVIDER_TRANSPORTER_EXISTS(15, "Provider transporter already exists");
+    PROVIDER_TRANSPORTER_EXISTS(15, "Provider transporter already exists"),
+    SHIPMENT_CLOSED(16, "Cannot add shipment item, Shipment is closed"),
+    TRANSPORTER_ASSIGNED(17,"Transporter is already assigned to a Shipment");
     
     private Status status;
     Response(int code, String message){

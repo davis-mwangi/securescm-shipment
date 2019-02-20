@@ -5,14 +5,27 @@
  */
 package com.securescm.shipment.controller;
 
+import com.securescm.shipment.entities.AssignTransporterRequest;
+import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Shipment;
+import com.securescm.shipment.entities.Transporter;
+import com.securescm.shipment.model.ShipmentModel;
+import com.securescm.shipment.payload.ApproveTransporterRequest;
 import com.securescm.shipment.payload.ShipmentRequest;
 import com.securescm.shipment.repos.ShipmentDao;
+import com.securescm.shipment.security.ApiPrincipal;
+import com.securescm.shipment.security.CurrentUser;
 import com.securescm.shipment.service.ShipmentService;
 import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
+import java.nio.file.attribute.UserPrincipal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +53,7 @@ public class ShipmentController {
     private ShipmentDao shipmentDao;
     
     @PostMapping
-    public ResponseEntity createShipment(@RequestBody ShipmentRequest request){   
+    public ResponseEntity createShipment(@RequestBody ShipmentRequest request, @CurrentUser ApiPrincipal apiPrincipal){   
         boolean providerExists = shipmentDao.existsByName(request.getName());
         request.setId(null);
         if(providerExists == true){
@@ -48,11 +61,11 @@ public class ShipmentController {
           return ResponseEntity.status(HttpStatus.CONFLICT).body(
                  new SingleItemResponse(Response.SHIPMENT_NAME_EXISTS.status(), null ));
         }
-        return ResponseEntity.ok().body(shipmentService.createUpdateShipment(request));
+        return ResponseEntity.ok().body(shipmentService.createUpdateShipment(request, apiPrincipal.getUser()));
     }
     
     @PutMapping
-    public ResponseEntity updateShipment(@RequestBody ShipmentRequest request){   
+    public ResponseEntity updateShipment(@RequestBody ShipmentRequest request,  @CurrentUser ApiPrincipal apiPrincipal){   
         if(request.getId() == null){
            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new SingleItemResponse(Response.EMPTY_ID_SUPPLIED.status(), null));
         }
@@ -60,25 +73,77 @@ public class ShipmentController {
         if(!shipmentDao.existsById(request.getId())){
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(Response.SHIPMENT_NOT_FOUND.status(), null));
         }
-        return ResponseEntity.ok().body(shipmentService.createUpdateShipment(request));
+        return ResponseEntity.ok().body(shipmentService.createUpdateShipment(request, apiPrincipal.getUser()));
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity getOneShipment(@PathVariable("id") Integer id){   
-        return ResponseEntity.ok().body(shipmentService.findOneShipment(id));
+    public ResponseEntity getOneShipment(@PathVariable("id") Integer id, @CurrentUser ApiPrincipal apiPrincipal){   
+        boolean exists =  shipmentDao.existsByIdAndCreatedBy(id, new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+        if(!exists){
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(Response.SHIPMENT_NOT_FOUND.status(), null));
+        }
+        return ResponseEntity.ok().body(shipmentService.findOneShipment(id, apiPrincipal.getUser()));
     }
     
     @GetMapping
-    public PagedResponse<Shipment> getAllProviders(
+    public PagedResponse<ShipmentModel> getAllShipments(
             @RequestParam(value = "direction", defaultValue = AppConstants.DEFAULT_ORDER_DIRECTION) String direction,
             @RequestParam(value = "oderBy", defaultValue = AppConstants.DEFAULT_ORDER_BY)  String orderBy,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size){
-       return shipmentService.getAllShipments(direction, orderBy, page, size);
+            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @CurrentUser ApiPrincipal apiPrincipal){
+       return shipmentService.getAllShipments(apiPrincipal.getUser(),direction, orderBy, page, size);
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity deleteShipment(@PathVariable("id") Integer id){     
         return ResponseEntity.ok().body(shipmentService.deleteShipment(id));
+    }
+    
+    @PostMapping("/transporter")
+    public ResponseEntity assignTransporter(@RequestBody AssignTransporterRequest request, 
+            @CurrentUser ApiPrincipal apiPrincipal){
+     List<Shipment> shipments=  shipmentDao.findByTransporterAndCreatedBy(
+             new Transporter(request.getTransporter()), 
+             new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+     
+    //Check if transporter is already assigned to transporter for given provider
+     if(!shipments.isEmpty()){
+         Shipment ship =  shipmentDao.getOneShipment(request.getShipment());
+        for (Shipment shipment: shipments){
+       
+        LocalDateTime date1 =  LocalDateTime.parse(shipment.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+        LocalDateTime date2 =  LocalDateTime.parse(ship.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+        
+           boolean isBefore =   date1.isBefore(date2);
+           if(!isBefore){
+              return ResponseEntity.status(HttpStatus.CONFLICT).body(new SingleItemResponse(Response.TRANSPORTER_ASSIGNED.status(), null));
+           }
+        }
+         //Get date of the shipment and compare with date of the shipemnt been modified
+         
+     }
+      return ResponseEntity.ok(shipmentService.assignTransporter(request)); 
+    }
+    
+    //Approve Shipment
+    @PostMapping("/transporter/approve")
+    public ResponseEntity upholdShipment(@RequestBody ApproveTransporterRequest request,
+            @CurrentUser ApiPrincipal apiPrincipal){
+       
+       return ResponseEntity.ok().body(shipmentService.approveShipment(apiPrincipal.getUser(), request));
+    }
+   
+    //Close Shipment
+    @PostMapping("/close/{id}")
+    public ResponseEntity closeShipment(@CurrentUser ApiPrincipal apiPrincipal, @PathVariable ("id") Integer id){
+    
+     boolean exists =  shipmentDao.existsByIdAndCreatedBy(id,
+             new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+     if(!exists){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(Response.SHIPMENT_NOT_FOUND.status(), null));
+
+     }
+    return ResponseEntity.ok().body(shipmentService.closeShipment(id));
     }
 }

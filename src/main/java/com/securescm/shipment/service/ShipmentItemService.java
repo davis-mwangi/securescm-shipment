@@ -6,7 +6,9 @@
 package com.securescm.shipment.service;
 
 import com.securescm.shipment.model.ShipmentItemModel;
+import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ShipmentItemRequest;
+import com.securescm.shipment.util.ListItemResponse;
 import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.SingleItemResponse;
 
@@ -18,6 +20,8 @@ import com.securescm.shipment.util.SingleItemResponse;
 public interface ShipmentItemService {
     public SingleItemResponse createUpdateShipmentItem(ShipmentItemRequest request);
     public SingleItemResponse deleteShipmentItem(Integer id);
-    public PagedResponse<ShipmentItemModel> getAllShipmentItems(String direction, String orderBy, int page, int size);
+    public PagedResponse<ShipmentItemModel> getAllShipmentItems(UserModel userModel,String direction, String orderBy, int page, int size);
     public SingleItemResponse findOneShipmentItem(Integer id);
+    
+     public ListItemResponse getAllOrderedItems(UserModel userModel);
 }

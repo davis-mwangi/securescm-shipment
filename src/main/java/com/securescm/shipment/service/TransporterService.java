@@ -7,6 +7,7 @@ package com.securescm.shipment.service;
 
 import com.securescm.shipment.entities.ProviderTransporter;
 import com.securescm.shipment.model.TransporterModel;
+import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ProviderTransporterRequest;
 import com.securescm.shipment.payload.TransporterRequest;
 import com.securescm.shipment.util.ListItemResponse;
@@ -25,10 +26,10 @@ public interface TransporterService {
     
     public ListItemResponse getAllTransporterTypes();
     
-    public SingleItemResponse createProviderTransporter(ProviderTransporterRequest request);
+    public SingleItemResponse createProviderTransporter(UserModel userModel,ProviderTransporterRequest request);
     public SingleItemResponse deleteProviderTransporter(Integer id);
     public PagedResponse<ProviderTransporter>getAllProviderTransporter(String direction, String orderBy, int page, int size);
     public SingleItemResponse findOneProviderTransporter(Integer id);
     
-    public PagedResponse<ProviderTransporter>getAllTransportersForProvider( Integer providerId, String direction, String orderBy, int page, int size);
+    public PagedResponse<ProviderTransporter>getAllTransportersForProvider( UserModel userModel, String direction, String orderBy, int page, int size);
 }

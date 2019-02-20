@@ -6,22 +6,29 @@
 package com.securescm.shipment.service.Impl;
 
 import com.securescm.shipment.entities.OrderItem;
+import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.model.ItemName;
 import com.securescm.shipment.model.ShipmentItemModel;
 import com.securescm.shipment.model.Status;
+import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ShipmentItemRequest;
+import com.securescm.shipment.repos.OrderDao;
 import com.securescm.shipment.repos.OrderItemDao;
+import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
 import com.securescm.shipment.service.ShipmentItemService;
+import com.securescm.shipment.util.ListItemResponse;
 import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -40,9 +47,16 @@ public class ShipmentItemServiceImpl implements ShipmentItemService{
     @Autowired
     private OrderItemDao orderItemDao;
     
+    @Autowired
+    private OrderDao orderDao;
+    
+    @Autowired
+    private ShipmentDao shipmentDao;
+    
     @Override
     public SingleItemResponse createUpdateShipmentItem(ShipmentItemRequest request) {
          ShipmentItem item=  new ShipmentItem();
+                  
          if(request.getId() !=  null){
             item =  shipmentItemDao.getOneShipmentItem(request.getId());
          }
@@ -75,7 +89,7 @@ public class ShipmentItemServiceImpl implements ShipmentItemService{
     }
 
     @Override
-    public PagedResponse<ShipmentItemModel> getAllShipmentItems(String direction, String orderBy, int page, int size) {
+    public PagedResponse<ShipmentItemModel> getAllShipmentItems(UserModel userModel, String direction, String orderBy, int page, int size) {
         Status status = null;
         Sort sort = null;
         if (direction.equals("ASC")) {
@@ -86,10 +100,21 @@ public class ShipmentItemServiceImpl implements ShipmentItemService{
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);
-
-       
-        Page<ShipmentItem> shipmentItems = shipmentItemDao.findAll(pageable);
-
+     
+        //Fetch all shipments for the provider
+        List<Shipment>shipments =  shipmentDao.findByCreatedByAndDateDeletedIsNull(new Provider(userModel.getStakeholder().getId()));
+        
+        //Query all shipment items for all shipments fetched above
+        List<ShipmentItem>items =  new ArrayList<>();
+        for(Shipment shipment: shipments){
+            List<ShipmentItem>shipItems =  shipmentItemDao.findByShipment(new Shipment(shipment.getId()));
+            for(ShipmentItem item:  shipItems){
+               items.add(item);
+            }
+          
+        }
+        final Page<ShipmentItem> shipmentItems = new PageImpl<>(items);
+        
         if (shipmentItems.getNumberOfElements() == 0) {
             return new PagedResponse<>(Response.SUCCESS.status(), Collections.emptyList(), shipmentItems.getNumber(),
                     shipmentItems.getSize(), shipmentItems.getTotalElements(), shipmentItems.getTotalPages(), shipmentItems.isLast());
@@ -110,6 +135,22 @@ public class ShipmentItemServiceImpl implements ShipmentItemService{
         ShipmentItem item =  shipmentItemDao.getOneShipmentItem(id);
         
       return new SingleItemResponse(Response.SUCCESS.status(), ShipmentItemModel.map(item) );
+    }
+    
+    //Get all Ordered items
+    @Override
+    public ListItemResponse getAllOrderedItems(UserModel userModel){
+//      List<Order>orders= orderDao.findByProvider(new Provider(userModel.getStakeholder().getId()));
+//      
+//      List<OrderItem>items  =  new ArrayList<>();
+//      for (Order order: orders){
+//         List<OrderItem>orderedItems =  orderItemDao.findByOrder(new Order(order.getId()));
+//         for(OrderItem item: orderedItems){
+//             items.add(item);
+//         }
+//      }
+      return new ListItemResponse(Response.SUCCESS.status(), null);
+      
     }
 
  

@@ -26,4 +26,8 @@ public class Retailer {
     private String name;
     
     private String logicalName;
+
+    public Retailer(Integer retId) {
+      this.id =  retId;
+    }
 }

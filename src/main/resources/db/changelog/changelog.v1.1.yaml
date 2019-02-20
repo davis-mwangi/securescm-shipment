@@ -3,11 +3,10 @@ databaseChangeLog:
     id: 34
     author: David
     changes:
-    - addColumn:
+    - dropColumn:
         catalogName: 
-        columns:
-        - column:
-            name: code
-            type: varchar(255)
-        schemaName: 
-        tableName: shipment        
+        columnName: code
+        schemaName:
+        tableName: shipment_transaction
+        
+        
