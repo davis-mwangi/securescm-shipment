@@ -5,7 +5,7 @@
  */
 package com.securescm.shipment.controller;
 
-import com.securescm.shipment.entities.ShipmentItem;
+import com.securescm.shipment.midaga.Spoc;
 import com.securescm.shipment.model.TransporterModel;
 import com.securescm.shipment.payload.TransporterRequest;
 import com.securescm.shipment.repos.AddressDao;
@@ -24,9 +24,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.securescm.shipment.repos.TransporterDao;
+import com.securescm.shipment.security.ApiPrincipal;
+import com.securescm.shipment.security.CurrentUser;
+import com.securescm.shipment.service.Impl.NetworkService;
 import com.securescm.shipment.service.TransporterService;
 import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.PagedResponse;
+import java.util.HashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
@@ -36,14 +43,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RestController
 @RequestMapping("/transporters")
 public class TransporterController {
+    
+    private Logger log =  LoggerFactory.getLogger(TransporterController.class);
     @Autowired
     private TransporterService transporterService;
     
     @Autowired
-    private TransporterDao serviceProviderDao;
+    private TransporterDao transporterDao;
     
     @Autowired
     private AddressDao addressDao;
+    
+    @Value(value = "${midaga.token}")
+    private String token;
+    
+    @Value(value ="${midaga.apiKey}")
+    private String apiKey;
+
     
    
     @GetMapping
@@ -56,7 +72,7 @@ public class TransporterController {
     }
     @GetMapping("/{id}")
     public ResponseEntity getTransporter(@PathVariable("id") Integer id){  
-        if(!serviceProviderDao.existsById(id)){
+        if(!transporterDao.existsById(id)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ListItemResponse(Response.TRANSPORTER_NOT_FOUND.status(), null));
         }
@@ -64,21 +80,25 @@ public class TransporterController {
     }
     
     @PostMapping
-    public ResponseEntity createTransporter(@RequestBody TransporterRequest request){   
-        boolean providerExists = serviceProviderDao.existsByName(request.getName());
+    public ResponseEntity createTransporter(@RequestBody TransporterRequest request, @CurrentUser ApiPrincipal apiPrincipal){   
+        boolean providerExists = transporterDao.existsByName(request.getName());
         request.setId(null);
         if(providerExists == true){
         
           return ResponseEntity.status(HttpStatus.CONFLICT).body(
                  new SingleItemResponse(Response.TRANSPORTER_NAME_EXIST.status(), null ));
         }
-        return ResponseEntity.ok().body(transporterService.createUpdateTransporter(request));
+        
+        SingleItemResponse itemResponse = transporterService.createUpdateTransporter(request, apiPrincipal.getUser());
+        
+        return ResponseEntity.ok().body(itemResponse);
     }
     
     @PutMapping
     public ResponseEntity updateTransporter( 
-            @RequestBody TransporterRequest request){ 
-        boolean providerExists = serviceProviderDao.existsById(request.getId());
+            @RequestBody TransporterRequest request,
+            @CurrentUser ApiPrincipal apiPrincipal){ 
+        boolean providerExists = transporterDao.existsById(request.getId());
         
         if(!providerExists){
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(
@@ -96,7 +116,8 @@ public class TransporterController {
                     null));
         }
         
-        return ResponseEntity.ok().body(transporterService.createUpdateTransporter(request));
+        return ResponseEntity.ok().body(transporterService.createUpdateTransporter(
+                request, apiPrincipal.getUser()));
     }
     
     @DeleteMapping("/{id}")
@@ -107,6 +128,26 @@ public class TransporterController {
     @GetMapping("/types")
     public ResponseEntity getAllTransporterTypes(){
        return ResponseEntity.ok().body(transporterService.getAllTransporterTypes());
+    }
+    
+    public HashMap formatDataTosend(TransporterModel entity) {
+        Spoc spoc = new Spoc();
+        spoc.setEmail(entity.getAddress().getEmail());
+        spoc.setMsisdn(entity.getAddress().getPhone());
+        spoc.setName(entity.getName());
+        spoc.setNationalId("20023411");
+        spoc.setPosition("SPOC");
+
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("business_name", entity.getName());
+        data.put("kra_pin", "");
+        data.put("country_code", entity.getAddress().getCountry().getCountryCode());
+        data.put("email", entity.getAddress().getEmail());
+        data.put("location", entity.getAddress().getAddress());
+        data.put("town", entity.getAddress().getCity());
+        data.put("spoc", spoc);
+
+        return data;
     }
 }
 

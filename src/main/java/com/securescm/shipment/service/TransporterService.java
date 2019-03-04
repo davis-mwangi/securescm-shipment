@@ -19,7 +19,7 @@ import com.securescm.shipment.util.SingleItemResponse;
  * @author david
  */
 public interface TransporterService {
-    public SingleItemResponse createUpdateTransporter(TransporterRequest request);
+    public SingleItemResponse createUpdateTransporter(TransporterRequest request, UserModel userModel);
     public SingleItemResponse deleteTransporter(Integer id);
     public PagedResponse<TransporterModel> getAllTransporters(String direction, String orderBy, int page, int size);
     public SingleItemResponse findOneTransporter(Integer id);

@@ -1,0 +1,37 @@
+databaseChangeLog:
+ - changeSet:
+    id: 46
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: madiga_id
+            type: varchar(255)
+        schemaName:
+        tableName: transporter
+ - changeSet:
+    id: 47
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: trial_times
+            type: int
+        schemaName:
+        tableName: transporter   
+ - changeSet:
+    id: 48
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: remarks
+            type: varchar(500)
+        schemaName:
+        tableName: transporter   

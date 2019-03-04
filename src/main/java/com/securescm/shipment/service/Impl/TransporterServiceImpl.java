@@ -5,12 +5,16 @@
  */
 package com.securescm.shipment.service.Impl;
 
+import com.securescm.shipment.entities.Country;
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.ProviderTransporter;
 import com.securescm.shipment.entities.TransporterAddress;
 import com.securescm.shipment.entities.Transporter;
 import com.securescm.shipment.entities.TransporterStatus;
 import com.securescm.shipment.entities.TransporterType;
+import com.securescm.shipment.kafka.MessageProducer;
+import com.securescm.shipment.kafka.models.ProducerEvent;
+import com.securescm.shipment.kafka.models.TransporterEventModel;
 import com.securescm.shipment.model.ItemName;
 import com.securescm.shipment.model.TransporterModel;
 import com.securescm.shipment.payload.TransporterRequest;
@@ -18,6 +22,7 @@ import com.securescm.shipment.model.Status;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ProviderTransporterRequest;
 import com.securescm.shipment.repos.AddressDao;
+import com.securescm.shipment.repos.CountryDao;
 import com.securescm.shipment.repos.ProviderTransporterDao;
 import com.securescm.shipment.util.ListItemResponse;
 import com.securescm.shipment.util.Response;
@@ -29,7 +34,10 @@ import com.securescm.shipment.repos.TransporterDao;
 import com.securescm.shipment.repos.TransporterTypeDao;
 import com.securescm.shipment.service.TransporterService;
 import com.securescm.shipment.util.PagedResponse;
+import com.securescm.shipment.util.Util;
 import java.util.Collections;
+import java.util.Date;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -53,22 +61,36 @@ public class TransporterServiceImpl implements TransporterService {
     
     @Autowired
     private ProviderTransporterDao providerTransporterDao;
+    
+    @Autowired
+    private CountryDao countryDao;
+    
+    @Value(value = "${topic.transporter}")
+    private String providerTopic;
+    
+    private String createEvent = "createUpdate";
+    private String deleteEvent = "delete"; 
+    
+    @Autowired
+    private MessageProducer messageProducer;
 
     @Override
-    public SingleItemResponse createUpdateTransporter(TransporterRequest request) {
+    public SingleItemResponse createUpdateTransporter(TransporterRequest request, UserModel userModel) {
         Status status;
-        Transporter provider = new Transporter();
+        Country country =  new Country();
+        Transporter transporter = new Transporter();
         SingleItemResponse singleItemResponse;
         TransporterAddress address = new TransporterAddress();
          if (request.getId() != null) {
-             provider = transporterDao.getOneServiceProvider(request.getId());
+             transporter = transporterDao.getOneServiceProvider(request.getId());
+             transporter.setDateLastUpdated(new Date());
          }
          
          if(request.getAddress().getId() != null){
            
             address = addressDao.getOneAddress(request.getAddress().getId());
          }
-        //Create provider address
+        //Create transporter address
        
         address.setAddress(request.getAddress().getAddress());
         address.setCity(request.getAddress().getCity());
@@ -84,15 +106,22 @@ public class TransporterServiceImpl implements TransporterService {
 
         //Create Provider
         
-        provider.setLogo(request.getLogo());
-        provider.setName(request.getName());
-        provider.setStatus(new TransporterStatus(1));
-        provider.setType(new TransporterType(request.getType()));
-        provider.setAddress(address);
-        transporterDao.save(provider);
+        transporter.setLogo(request.getLogo());
+        transporter.setName(request.getName());
+        transporter.setStatus(new TransporterStatus(1));
+        transporter.setType(new TransporterType(request.getType()));
+        transporter.setAddress(address);
+        transporter.setDateCreated(new Date());
+        transporter.setCreatedBy(userModel.getId());
+        transporterDao.save(transporter);
 
-        ItemName item = new ItemName(provider.getId(), provider.getName());
+        ItemName item = new ItemName(transporter.getId(), transporter.getName());
         singleItemResponse = new SingleItemResponse(Response.SUCCESS.status(), item);
+        country =  countryDao.getOneCountry(transporter.getAddress().getCountry().getId());
+        //Dipatch event
+        ProducerEvent event =  new ProducerEvent(createEvent,TransporterEventModel.map(transporter, country));
+        messageProducer.publish(providerTopic, Util.toJson(event));
+        
         return singleItemResponse;
     }
 
@@ -100,8 +129,8 @@ public class TransporterServiceImpl implements TransporterService {
     public SingleItemResponse deleteTransporter(Integer id) {
         Status status;
         SingleItemResponse singleItemResponse;
-        Transporter provider = transporterDao.getOneServiceProvider(id);
-        if (provider != null) {
+        Transporter transporter = transporterDao.getOneServiceProvider(id);
+        if (transporter != null) {
             transporterDao.deleteById(id);
             singleItemResponse = new SingleItemResponse(Response.SUCCESS.status(),
                     null);
@@ -109,6 +138,9 @@ public class TransporterServiceImpl implements TransporterService {
             singleItemResponse = new SingleItemResponse(Response.TRANSPORTER_NOT_FOUND.status(),
                     null);
         }
+        ProducerEvent event =  new ProducerEvent(deleteEvent, new ItemName(transporter.getId(), transporter.getName()));
+        messageProducer.publish(providerTopic, Util.toJson(event));
+        
         return singleItemResponse;
     }
     

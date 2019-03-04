@@ -5,4 +5,9 @@ databaseChangeLog:
         file: /db/changelog/changelog.v1.2.yaml
         file: /db/changelog/changelog.v1.3.yaml
         file: /db/changelog/changelog.v1.4.yaml
+        file: /db/changelog/changelog.v1.5.yaml
+        file: /db/changelog/changelog.v1.6.yaml
+        file: /db/changelog/changelog.v1.7.yaml
+        file: /db/changelog/changelog.v1.8.yaml
+    
   

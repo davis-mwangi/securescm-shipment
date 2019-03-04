@@ -39,11 +39,29 @@ public class ShipmentItem {
     @ManyToOne(optional = false)
     private Product product;
     
+    @JoinColumn(name = "provider", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Provider provider;
+    
+    @JoinColumn(name = "retailer", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Retailer retailer;
+    
     private double quantity;
     
     @JoinColumn(name = "order_item", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private OrderItem orderItem;
+    
+    @JoinColumn(name = "status", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    
+    private ShipmentItemStatus status;
+    
+    private int checkedBy;
+    private String remarks;
+    
+    
 
     
 }

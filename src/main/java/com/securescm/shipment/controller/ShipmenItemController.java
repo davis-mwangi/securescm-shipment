@@ -8,6 +8,7 @@ package com.securescm.shipment.controller;
 import com.securescm.shipment.entities.OrderItem;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.model.ShipmentItemModel;
+import com.securescm.shipment.payload.SecurityCheckRequest;
 import com.securescm.shipment.payload.ShipmentItemRequest;
 import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
@@ -36,7 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @author david
  */
 @RestController
-@RequestMapping("items")
+@RequestMapping("/items")
 public class ShipmenItemController {
 
    @Autowired
@@ -57,7 +58,7 @@ public class ShipmenItemController {
         
         Shipment shipment =  shipmentDao.getOneShipment(request.getShipment());
          
-        if(shipment.getStatus().getCode().equals("106")){
+        if(!shipment.getStatus().getCode().equals("105")){
             return ResponseEntity.ok().body(new SingleItemResponse(Response.SHIPMENT_CLOSED.status(), null));
         }
          
@@ -109,10 +110,12 @@ public class ShipmenItemController {
         return ResponseEntity.ok().body(shipmentItemService.deleteShipmentItem(id));
     }
     
-    @GetMapping("/ordered")
-    public ResponseEntity getAllOrdered(@CurrentUser ApiPrincipal apiPrincipal){
-        //Integer id = 1;
-        return ResponseEntity.ok().body(shipmentItemService.getAllOrderedItems(apiPrincipal.getUser()));
+    @PostMapping("/check")
+    public ResponseEntity approveShipmentItem(@CurrentUser ApiPrincipal apiPrincipal,
+            @RequestBody SecurityCheckRequest request){
+        
+        return ResponseEntity.ok().body(shipmentItemService.approveShipmentItem(apiPrincipal.getUser(), 
+                request));
    
     }
 }

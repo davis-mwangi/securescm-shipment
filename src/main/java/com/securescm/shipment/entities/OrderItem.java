@@ -27,9 +27,9 @@ public class OrderItem {
     @Id
     private Integer id;
     
-    @JoinColumn(name = "order_tbl", referencedColumnName = "id")
+    @JoinColumn(name = "retailer", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Order order;
+    private Retailer retailer;
     
     @JoinColumn(name = "product", referencedColumnName = "id")
     @ManyToOne(optional = false)

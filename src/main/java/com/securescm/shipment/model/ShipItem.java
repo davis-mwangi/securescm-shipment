@@ -7,6 +7,7 @@ package com.securescm.shipment.model;
 
 import com.securescm.shipment.entities.Product;
 import com.securescm.shipment.entities.Retailer;
+import com.securescm.shipment.entities.ShipmentItemStatus;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -29,5 +30,7 @@ public class ShipItem {
     private Date orderDate;
     
     private Date orderRequiredDate;
+    
+    private ShipmentItemStatus status;
         
 }

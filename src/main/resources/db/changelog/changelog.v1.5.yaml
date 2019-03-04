@@ -1,0 +1,46 @@
+databaseChangeLog:
+ - changeSet:
+    id: 42
+    author: David
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: order_item
+        constraintName:  fk_order_item_order     
+ - changeSet:
+    id: 43
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: order_tbl
+        schemaName:
+        tableName: order_item   
+ - changeSet:
+    id: 44
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: retailer
+            type: int
+        schemaName:
+        tableName: order_item
+        
+ - changeSet:
+      id: 45
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: retailer
+            baseTableName: order_item
+            constraintName: fk_order_item_retailer
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: retailer          
+        
+      

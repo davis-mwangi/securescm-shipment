@@ -6,6 +6,8 @@
 package com.securescm.shipment.repos;
 
 import com.securescm.shipment.entities.OrderItem;
+import com.securescm.shipment.entities.Provider;
+import com.securescm.shipment.entities.Retailer;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.ShipmentItem;
 import java.util.List;
@@ -30,4 +32,9 @@ public interface  ShipmentItemDao extends  JpaRepository<ShipmentItem,Integer>{
     List<ShipmentItem>findByShipment(Shipment shipment);
     
     Page<ShipmentItem>findByShipment(Shipment shipment, Pageable pageable);
+    Page<ShipmentItem>findByProvider(Provider provider, Pageable pageable);
+    Page<ShipmentItem>findByRetailer(Retailer retailer, Pageable pageable);
+    
+    List<ShipmentItem>findByProvider(Provider provider);
+    List<ShipmentItem>findByRetailer(Retailer retailer);
 }
