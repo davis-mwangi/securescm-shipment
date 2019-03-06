@@ -31,7 +31,9 @@ public enum Response {
     PROVIDER_TRANSPORTER_NOT_FOUND(14, "Provider transporter not found"),
     PROVIDER_TRANSPORTER_EXISTS(15, "Provider transporter already exists"),
     SHIPMENT_CLOSED(16, "Cannot add shipment item, Shipment is closed"),
-    TRANSPORTER_ASSIGNED(17,"Transporter is already assigned to a Shipment");
+    TRANSPORTER_ASSIGNED(17,"Transporter is already assigned to a Shipment"),
+    PROVIDER_ONLY(18, "Only provider allowed to carry out the process"),
+    TRANSPORTER_ONLY(18, "Only transporter allowed to carry out this process");
     
     private Status status;
     Response(int code, String message){

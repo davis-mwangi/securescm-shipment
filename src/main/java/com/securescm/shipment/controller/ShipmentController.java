@@ -20,11 +20,8 @@ import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
-import java.nio.file.attribute.UserPrincipal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -77,12 +74,13 @@ public class ShipmentController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity getOneShipment(@PathVariable("id") Integer id, @CurrentUser ApiPrincipal apiPrincipal){   
-        boolean exists =  shipmentDao.existsByIdAndCreatedBy(id, new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+    public ResponseEntity getOneShipment(@PathVariable("id") Integer id,
+            @CurrentUser ApiPrincipal principal){   
+        boolean exists =  shipmentDao.existsById(id);
         if(!exists){
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(Response.SHIPMENT_NOT_FOUND.status(), null));
         }
-        return ResponseEntity.ok().body(shipmentService.findOneShipment(id, apiPrincipal.getUser()));
+        return ResponseEntity.ok().body(shipmentService.findOneShipment(principal.getUser(), id));
     }
     
     @GetMapping
@@ -106,6 +104,10 @@ public class ShipmentController {
      List<Shipment> shipments=  shipmentDao.findByTransporterAndCreatedBy(
              new Transporter(request.getTransporter()), 
              new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+      if(!apiPrincipal.getUser().getRole().getName().equalsIgnoreCase("Provider")){
+         return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(
+                 new SingleItemResponse(Response.PROVIDER_ONLY.status(), null));
+     }
      
     //Check if transporter is already assigned to transporter for given provider
      if(!shipments.isEmpty()){
@@ -130,6 +132,10 @@ public class ShipmentController {
     @PostMapping("/transporter/approve")
     public ResponseEntity upholdShipment(@RequestBody ApproveTransporterRequest request,
             @CurrentUser ApiPrincipal apiPrincipal){
+        if (!apiPrincipal.getUser().getRole().getName().equalsIgnoreCase("Transporter")) {
+            return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(
+                    new SingleItemResponse(Response.TRANSPORTER_ONLY.status(), null));
+        }
        
        return ResponseEntity.ok().body(shipmentService.approveShipment(apiPrincipal.getUser(), request));
     }
@@ -140,6 +146,10 @@ public class ShipmentController {
     
      boolean exists =  shipmentDao.existsByIdAndCreatedBy(id,
              new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+     if(!apiPrincipal.getUser().getRole().getName().equalsIgnoreCase("Provider")){
+         return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(
+                 new SingleItemResponse(Response.PROVIDER_ONLY.status(), null));
+     }
      if(!exists){
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new SingleItemResponse(Response.SHIPMENT_NOT_FOUND.status(), null));
 

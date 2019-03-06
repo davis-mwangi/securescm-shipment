@@ -130,28 +130,30 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
     public SingleItemResponse approveShipmentItem(UserModel userModel, SecurityCheckRequest request) {
 
         ShipmentItem item;
+        Shipment shipment;
         item = shipmentItemDao.getOneShipmentItem(request.getShipmentItem());
-        Shipment shipment = shipmentDao.getOneShipment(item.getShipment().getId());
+        
         if (item != null && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
             if (request.getStatus() == 1) {
                 item.setStatus(new ShipmentItemStatus(AppConstants.ITEM_DELIVRED));
-
+               // shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_DELIVERED));
             } else if (request.getStatus() == 2) {
                 item.setStatus(new ShipmentItemStatus(AppConstants.REJECTED_ON_RETAILER));
             }
             item.setCheckedBy(userModel.getId());
             item.setRemarks(request.getRemarks());
-            shipmentItemDao.save(item);
-
+            item = shipmentItemDao.save(item);
+            
+            shipment = shipmentDao.getOneShipment(item.getShipment().getId());
             int [] arr = statusIds(shipment);
             boolean found = IntStream.of(arr).anyMatch(n -> n == 3);
             boolean match = IntStream.of(arr).allMatch(n -> n == 3);
 
             //Update shipment status
             
-            if (match) {
+            if (match && found) {
                 shipment.setStatus(new ShipmentStatus(AppConstants.DELIVERED));
-            } else if (found) {
+            } else if (found && !match) {
                 shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_DELIVERED));
             }
 
@@ -160,20 +162,23 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
         } else if (item != null && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")) {
             if (request.getStatus() == 1) {
                 item.setStatus(new ShipmentItemStatus(AppConstants.ITEM_ON_DELIVERY));
-                shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_ON_DELIVERY));
+               // shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_ON_DELIVERY));
             } else if (request.getStatus() == 2) {
                 item.setStatus(new ShipmentItemStatus(AppConstants.REJECTED_ON_PROVIDER));
             }
             
             item.setCheckedBy(userModel.getId());
             item.setRemarks(request.getRemarks());
-            shipmentItemDao.save(item);
-
+            item = shipmentItemDao.save(item);
+            
+            shipment = shipmentDao.getOneShipment(item.getShipment().getId());
             int [] arr = statusIds(shipment);
             boolean found = IntStream.of(arr).anyMatch(n -> n == 2);
             boolean match = IntStream.of(arr).allMatch(n -> n == 2);
 
             //Update shipment status
+            //log.info(Boolean.toString(found));
+            //log.info(Boolean.toString(match));
             
             if (match) {
                 shipment.setStatus(new ShipmentStatus(AppConstants.ON_DELIVERY));

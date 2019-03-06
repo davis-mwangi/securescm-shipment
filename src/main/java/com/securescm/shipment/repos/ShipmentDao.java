@@ -7,6 +7,7 @@ package com.securescm.shipment.repos;
 
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Shipment;
+import com.securescm.shipment.entities.ShipmentStatus;
 import com.securescm.shipment.entities.Transporter;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -28,10 +29,18 @@ public interface ShipmentDao extends PagingAndSortingRepository<Shipment, Intege
      public Shipment getOneShipment(@Param("id")Integer id);
      
     Page<Shipment> findByCreatedByAndDateDeletedIsNull(Provider provider,Pageable pageable);
-    
+    Page<Shipment>findByTransporterAndDateDeletedIsNull(Transporter transporter,Pageable pageable );
+     
     public Shipment findByIdAndDateDeletedIsNull(Integer id);
+    @Query(value =" SELECT s FROM Shipment s WHERE s.id = :id AND s.status.id = 9")
+    public Shipment findByIdAndStatus(@Param("id")Integer id);
+    
+  
+   
+    
     public Shipment findByIdAndCreatedBy(Integer id, Provider provider);
     boolean existsByIdAndCreatedBy(Integer id, Provider provider);
     List<Shipment>findByCreatedByAndDateDeletedIsNull(Provider provider);
+   
     List<Shipment> findByTransporterAndCreatedBy(Transporter transporter, Provider provider);
 }

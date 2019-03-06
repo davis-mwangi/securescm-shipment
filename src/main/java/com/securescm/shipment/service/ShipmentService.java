@@ -21,7 +21,7 @@ public interface ShipmentService {
     public SingleItemResponse createUpdateShipment(ShipmentRequest request, UserModel userModel);
     public SingleItemResponse deleteShipment(Integer id);
     public PagedResponse<ShipmentModel> getAllShipments(UserModel userModel, String direction, String orderBy, int page, int size);
-    public SingleItemResponse findOneShipment(Integer id, UserModel userModel);
+    public SingleItemResponse findOneShipment(UserModel userModel,Integer id);
     
     
     public SingleItemResponse assignTransporter(AssignTransporterRequest request);

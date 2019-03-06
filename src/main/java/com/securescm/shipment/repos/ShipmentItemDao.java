@@ -35,6 +35,12 @@ public interface  ShipmentItemDao extends  JpaRepository<ShipmentItem,Integer>{
     Page<ShipmentItem>findByProvider(Provider provider, Pageable pageable);
     Page<ShipmentItem>findByRetailer(Retailer retailer, Pageable pageable);
     
+    @Query(value="SELECT s FROM ShipmentItem s WHERE s.provider.id = :id AND s.status.id = 1")
+    List<ShipmentItem>findByProviderAndStatus1(@Param("id") Integer id);
+    
+    @Query(value="SELECT s FROM ShipmentItem s WHERE s.retailer.id = :id AND s.status.id = 2")
+    List<ShipmentItem>findByRetailerAndStatus2(@Param("id") Integer id);
+    
     List<ShipmentItem>findByProvider(Provider provider);
-    List<ShipmentItem>findByRetailer(Retailer retailer);
+ 
 }
