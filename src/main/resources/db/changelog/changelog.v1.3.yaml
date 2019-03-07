@@ -1,0 +1,45 @@
+databaseChangeLog:
+ - changeSet:
+    id: 36
+    author: David
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: order_tbl
+        constraintName: fk_order_provider    
+ - changeSet:
+    id: 37
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: provider
+        schemaName:
+        tableName: order_tbl
+        
+ - changeSet:
+    id: 38
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: date_required
+            type: datetime
+        schemaName:
+        tableName: order_item        
+        
+ - changeSet:
+    id: 39
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: uom
+            type: varchar(50)
+        schemaName:
+        tableName: order_item
+        
+      

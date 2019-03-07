@@ -5,7 +5,11 @@
  */
 package com.securescm.shipment.model;
 
+import com.securescm.shipment.entities.Product;
+import com.securescm.shipment.entities.Retailer;
+import com.securescm.shipment.entities.ShipmentItemStatus;
 import java.util.Date;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,45 +17,20 @@ import lombok.NoArgsConstructor;
  *
  * @author david
  */
-@NoArgsConstructor
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ShipItem {
-    private Integer id;
-    private String code;
-    private String name;
-    private String deliveryAddress;
-    private Date shipmentDate;
-
-    public ShipItem(Integer id) {
-        this.id = id;
-    }
-
-    public ShipItem(Integer id, String code) {
-        this.id = id;
-        this.code = code;
-    }
-
-    public ShipItem(Integer id, String code, String name) {
-        this.id = id;
-        this.code = code;
-        this.name = name;
-    }
-
-    public ShipItem(Integer id, String code, String name, String deliveryAddress) {
-        this.id = id;
-        this.code = code;
-        this.name = name;
-        this.deliveryAddress = deliveryAddress;
-    }
-
-    public ShipItem(Integer id, String code, String name, String deliveryAddress, Date shipmentDate) {
-        this.id = id;
-        this.code = code;
-        this.name = name;
-        this.deliveryAddress = deliveryAddress;
-        this.shipmentDate = shipmentDate;
-    }
+    private int id;
     
+    private  Product product;
     
-
+    private Retailer retailer;
+    
+    private Date orderDate;
+    
+    private Date orderRequiredDate;
+    
+    private ShipmentItemStatus status;
+        
 }

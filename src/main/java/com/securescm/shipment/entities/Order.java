@@ -30,16 +30,18 @@ public class Order {
     private Integer id;
     
     @JoinColumn(name = "retailer", referencedColumnName = "id")
-    @ManyToOne(optional = false)
+    @ManyToOne
     private Retailer retailer;
-    
-    @JoinColumn(name = "provider", referencedColumnName = "id")
-    @ManyToOne(optional = false)
-    private Provider provider;
     
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date orderDate;
     
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date requiredDate;
+    
+    public Order(Integer id){
+    this.id = id;
+    }
+
+ 
 }

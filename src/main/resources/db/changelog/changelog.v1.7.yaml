@@ -1,0 +1,29 @@
+databaseChangeLog:
+ - changeSet:
+    id: 49
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: madiga_id
+        schemaName:
+        tableName: transporter 
+ - changeSet:
+    id: 50
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: trial_times
+        schemaName:
+        tableName: transporter
+ - changeSet:
+    id: 51
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: remarks
+        schemaName:
+        tableName: transporter       
+        

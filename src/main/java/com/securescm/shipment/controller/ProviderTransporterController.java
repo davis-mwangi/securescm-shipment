@@ -9,8 +9,9 @@ import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.ProviderTransporter;
 import com.securescm.shipment.entities.Transporter;
 import com.securescm.shipment.payload.ProviderTransporterRequest;
-import com.securescm.shipment.payload.TransporterRequest;
 import com.securescm.shipment.repos.ProviderTransporterDao;
+import com.securescm.shipment.security.ApiPrincipal;
+import com.securescm.shipment.security.CurrentUser;
 import com.securescm.shipment.service.TransporterService;
 import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.ListItemResponse;
@@ -49,11 +50,12 @@ public class ProviderTransporterController {
             @RequestParam(value = "direction", defaultValue = AppConstants.DEFAULT_ORDER_DIRECTION) String direction,
             @RequestParam(value = "oderBy", defaultValue = AppConstants.DEFAULT_ORDER_BY)  String orderBy,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size){
+            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @CurrentUser ApiPrincipal apiPrincipal){
         
-       int id = 2; //To be replaced with provider id nfrom token
+       //int id = 2; //To be replaced with provider id nfrom token
        
-       return transporterService.getAllTransportersForProvider(id, direction, orderBy, page, size);
+       return transporterService.getAllTransportersForProvider(apiPrincipal.getUser(), direction, orderBy, page, size);
     }
     
     @GetMapping("/all")
@@ -74,8 +76,10 @@ public class ProviderTransporterController {
     }
     
     @PostMapping
-    public ResponseEntity createProviderTransporter(@RequestBody ProviderTransporterRequest request){   
-        boolean exists = providerTransporterDao.existsByProviderAndTransporter(new Provider(request.getProvider()), 
+    public ResponseEntity createProviderTransporter(@RequestBody ProviderTransporterRequest request,
+            @CurrentUser ApiPrincipal apiPricipal){   
+        boolean exists = providerTransporterDao.existsByProviderAndTransporter(
+                new Provider(apiPricipal.getUser().getStakeholder().getId()), 
                 new Transporter(request.getTransporter()));
         request.setId(null);
         if(exists == true){
@@ -83,15 +87,17 @@ public class ProviderTransporterController {
           return ResponseEntity.status(HttpStatus.CONFLICT).body(
                  new SingleItemResponse(Response.PROVIDER_TRANSPORTER_EXISTS.status(), null ));
         }
-        return ResponseEntity.ok().body(transporterService.createProviderTransporter(request));
+        return ResponseEntity.ok().body(transporterService.createProviderTransporter(apiPricipal.getUser(),request));
     }
     
     @PutMapping
     public ResponseEntity updatePRoviderTransporter( 
+            @CurrentUser ApiPrincipal apiPrincipal,
             @RequestBody ProviderTransporterRequest request){ 
         boolean exists = providerTransporterDao.existsById(request.getId());
         
-        boolean ptExists = providerTransporterDao.existsByProviderAndTransporter(new Provider(request.getProvider()), 
+        boolean ptExists = providerTransporterDao.existsByProviderAndTransporter(
+                new Provider(apiPrincipal.getUser().getStakeholder().getId()), 
                 new Transporter(request.getTransporter()));
        
         if(!exists){
@@ -107,13 +113,13 @@ public class ProviderTransporterController {
         }
        
         
-        return ResponseEntity.ok().body(transporterService.createProviderTransporter(request));
+        return ResponseEntity.ok().body(transporterService.createProviderTransporter(apiPrincipal.getUser(),
+                request));
     }
     
     @DeleteMapping("/{id}")
     public ResponseEntity deleteProviderTransporter(@PathVariable("id") Integer id){     
         return ResponseEntity.ok().body(transporterService.deleteProviderTransporter(id));
     }
-    
     
 }

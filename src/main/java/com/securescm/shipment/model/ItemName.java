@@ -5,6 +5,7 @@
  */
 package com.securescm.shipment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
  */
 @NoArgsConstructor
 @Data
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class ItemName {
     private int id;
     private String name;

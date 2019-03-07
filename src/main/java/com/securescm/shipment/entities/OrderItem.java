@@ -5,10 +5,12 @@
  */
 package com.securescm.shipment.entities;
 
+import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,17 +27,26 @@ public class OrderItem {
     @Id
     private Integer id;
     
-    @JoinColumn(name = "order_tbl", referencedColumnName = "id")
+    @JoinColumn(name = "retailer", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Order order;
+    private Retailer retailer;
     
     @JoinColumn(name = "product", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Product product;
     
+    @JoinColumn(name = "provider", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Provider provider;
+    
     private double quantity;
     
     private double unitPrice;
+    
+    private String uom;
+    
+    @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+    private Date dateRequired;
 
     public OrderItem(int orderItem) {
        this.id = orderItem;

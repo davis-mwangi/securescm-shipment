@@ -1,0 +1,173 @@
+databaseChangeLog:
+ - changeSet:
+    id: 52
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: date_created
+            type: datetime
+        schemaName:
+        tableName: transporter
+ - changeSet:
+    id: 53
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: date_last_updated
+            type: datetime
+        schemaName:
+        tableName: transporter   
+ - changeSet:
+    id: 54
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: created_by
+            type: int
+        schemaName:
+        tableName: transporter  
+        
+ - changeSet:
+      id: 55
+      author: David
+      changes:
+        - createTable:
+            tableName: shipment_item_status
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(100)
+                  constraints:
+                    nullable: false   
+ - changeSet:
+    id: 56
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: status
+            type: int
+        schemaName:
+        tableName: shipment_item     
+        
+ - changeSet:
+      id: 57
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_status
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment_item_status 
+ - changeSet:
+    id: 58
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: checked_by
+            type: int
+        schemaName:
+        tableName: shipment_item   
+ - changeSet:
+    id: 59
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: date_deleted
+            type: Date
+        schemaName:
+        tableName: transporter  
+ - changeSet:
+    id: 60
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: remarks
+            type: VARCHAR(500)
+        schemaName:
+        tableName: shipment_item
+ - changeSet:
+    id: 61
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: provider
+            type: int
+        schemaName:
+        tableName: shipment_item  
+ - changeSet:
+    id: 62
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: retailer
+            type: int
+        schemaName:
+        tableName: shipment_item   
+ - changeSet:
+      id: 63
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_provider
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: provider  
+ - changeSet:
+      id: 64
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: retailer
+            baseTableName: shipment_item
+            constraintName: fk_shipment_item_retailer
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: retailer             
+        

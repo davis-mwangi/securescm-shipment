@@ -9,6 +9,7 @@ import com.securescm.shipment.entities.Product;
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Retailer;
 import com.securescm.shipment.entities.ShipmentItem;
+import com.securescm.shipment.entities.ShipmentItemStatus;
 import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,7 +28,7 @@ public class ShipmentItemModel {
 
     private Product product;
 
-    private ShipItem shipment;
+    private ShipCustom shipment;
 
     private double quantity;
 
@@ -38,13 +39,15 @@ public class ShipmentItemModel {
     private Date orderDate;
 
     private Date orderRequiredDate;
+    
+    private ShipmentItemStatus status;
 
     public static ShipmentItemModel map(ShipmentItem sim) {
         ShipmentItemModel model = new ShipmentItemModel();
         model.setId(sim.getId());
         model.setProduct(sim.getProduct());
         model.setQuantity(sim.getQuantity());
-        model.setShipment(new ShipItem(
+        model.setShipment(new ShipCustom(
                 sim.getShipment().getId(),
                 sim.getShipment().getCode(),
                 sim.getShipment().getName(),
@@ -53,10 +56,11 @@ public class ShipmentItemModel {
                         sim.getShipment().getCountry().getCountry_name(),
                 sim.getShipment().getShipmentDate()));
         
-        model.setRetailer(sim.getOrderItem().getOrder().getRetailer());
-        model.setProvider(sim.getOrderItem().getOrder().getProvider());
-        model.setOrderDate(sim.getOrderItem().getOrder().getOrderDate());
-        model.setOrderRequiredDate(sim.getOrderItem().getOrder().getRequiredDate());
+        model.setRetailer(sim.getOrderItem().getRetailer());
+        model.setStatus(sim.getStatus());
+        model.setProvider(sim.getOrderItem().getProvider());
+        model.setOrderDate(null);
+        model.setOrderRequiredDate(sim.getOrderItem().getDateRequired());
 
         return model;
 

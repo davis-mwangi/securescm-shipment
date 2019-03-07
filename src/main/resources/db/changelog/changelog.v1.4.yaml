@@ -1,0 +1,30 @@
+databaseChangeLog:
+ - changeSet:
+    id: 40
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: provider
+            type: int
+        schemaName:
+        tableName: order_item
+        
+ - changeSet:
+      id: 41
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: provider
+            baseTableName: order_item
+            constraintName: fk_order_item_provider
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: provider          
+        
+      

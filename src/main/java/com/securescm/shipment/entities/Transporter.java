@@ -5,12 +5,14 @@
  */
 package com.securescm.shipment.entities;
 
+import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,16 @@ public class Transporter {
   @JoinColumn(name = "status", referencedColumnName = "id")
   @ManyToOne(optional = false)
   private TransporterStatus status;
+  
+  @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+  private Date dateCreated;
+  @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+  private Date dateLastUpdated;
+   @Temporal(javax.persistence.TemporalType.TIMESTAMP)
+  private Date dateDeleted;
+   
+  private int createdBy;
+  
 
     public Transporter(int id) {
       this.id = id;
