@@ -7,6 +7,7 @@ package com.securescm.shipment.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.securescm.shipment.model.Status;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -98,6 +99,13 @@ public class Util<T> {
     
     public static boolean isPost(HttpServletRequest request) {
         return "POST".equals(request.getMethod());
+    }
+    
+    public static ResponseEntity getResponse(Status status, Object entity){
+        return ResponseEntity.ok().body(status.getCode() == Response.SUCCESS.status().getCode() ? (entity != null ? entity : new ResultResponse(status)) : new ResultResponse(status));
+    }
+    public static ResponseEntity getResponse(Status status){
+        return getResponse(status,null);
     }
     
     

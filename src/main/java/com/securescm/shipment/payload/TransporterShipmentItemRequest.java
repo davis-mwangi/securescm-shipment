@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.securescm.shipment.entities;
+package com.securescm.shipment.payload;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,11 +13,14 @@ import lombok.NoArgsConstructor;
  *
  * @author david
  */
-@Data
-@AllArgsConstructor
+@Data 
 @NoArgsConstructor
-public class AssignTransporterRequest {   
-    private Integer shipment;
-    private int transporter;
-    
+@AllArgsConstructor
+public class TransporterShipmentItemRequest {
+   
+    private Integer id;
+    private int shipmentItem;
+    private double quantity;
+    private int transporterShipment;
+    private String status;
 }

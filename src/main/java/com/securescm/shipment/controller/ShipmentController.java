@@ -5,7 +5,7 @@
  */
 package com.securescm.shipment.controller;
 
-import com.securescm.shipment.entities.AssignTransporterRequest;
+import com.securescm.shipment.payload.AssignTransporterRequest;
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.Transporter;

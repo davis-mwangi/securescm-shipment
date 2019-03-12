@@ -5,7 +5,7 @@
  */
 package com.securescm.shipment.service;
 
-import com.securescm.shipment.entities.AssignTransporterRequest;
+import com.securescm.shipment.payload.AssignTransporterRequest;
 import com.securescm.shipment.model.ShipmentModel;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ApproveTransporterRequest;
@@ -22,7 +22,7 @@ public interface ShipmentService {
     public SingleItemResponse deleteShipment(Integer id);
     public PagedResponse<ShipmentModel> getAllShipments(UserModel userModel, String direction, String orderBy, int page, int size);
     public SingleItemResponse findOneShipment(UserModel userModel,Integer id);
-    
+     
     
     public SingleItemResponse assignTransporter(AssignTransporterRequest request);
     public SingleItemResponse approveShipment(UserModel userModel, ApproveTransporterRequest request);

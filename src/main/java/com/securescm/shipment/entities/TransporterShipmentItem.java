@@ -5,13 +5,14 @@
  */
 package com.securescm.shipment.entities;
 
+import java.util.Date;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.Temporal;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,52 +25,48 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class ShipmentItem {
+public class TransporterShipmentItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    
+   
     @JoinColumn(name = "shipment", referencedColumnName = "id")
-    @ManyToOne(fetch = FetchType.LAZY,optional=true)
-//    @NotFound(action = NotFoundAction.IGNORE)
+    @ManyToOne(optional = false)
     private Shipment shipment;
-    
-    @JoinColumn(name = "product", referencedColumnName = "id")
+   
+    @JoinColumn(name = "shipment_item", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Product product;
+    private ShipmentItem shipmentItem;
     
-    @JoinColumn(name = "provider", referencedColumnName = "id")
+    @JoinColumn(name = "vehicle", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Provider provider;
-    
-    @JoinColumn(name = "retailer", referencedColumnName = "id")
+    private Vehicle vehicle;
+   
+    @JoinColumn(name = "driver", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private Retailer retailer;
-    
+    private Driver driver;
     private double quantity;
-    private double loadedQuantity;
-    private double receivedQuantity;
-    private double assignedQuantity;
     
-    @JoinColumn(name = "order_item", referencedColumnName = "id")
+    @JoinColumn(name = "transporter_shipment", referencedColumnName = "id")
     @ManyToOne(optional = false)
-    private OrderItem orderItem;
-    
+    private TransporterShipment transporterShipment;
+   
     @JoinColumn(name = "status", referencedColumnName = "id")
     @ManyToOne(optional = false)
+    private TransporterShipmentItemStatus status;
     
-    private ShipmentItemStatus status;
-    
-    private int checkedBy;
-    private String remarks;
+    @Temporal(javax.persistence.TemporalType.DATE)
+    private Date dateCreated;
+    @Temporal(javax.persistence.TemporalType.DATE)
+    private Date dateLastUpdated;
+    @Temporal(javax.persistence.TemporalType.DATE)
+    private Date dateDeleted;
 
-    public ShipmentItem(Integer id) {
-        this.id = id;
+    public TransporterShipmentItem(Integer d) {
+        this.id = d;
     }
 
-    
-    
-
+   
     
 }

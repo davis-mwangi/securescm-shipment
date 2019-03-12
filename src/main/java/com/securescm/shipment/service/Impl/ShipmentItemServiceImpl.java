@@ -14,7 +14,6 @@ import com.securescm.shipment.entities.ShipmentItemStatus;
 import com.securescm.shipment.entities.ShipmentStatus;
 import com.securescm.shipment.model.ItemName;
 import com.securescm.shipment.model.ShipmentItemModel;
-import com.securescm.shipment.model.Status;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.SecurityCheckRequest;
 import com.securescm.shipment.payload.ShipmentItemRequest;
@@ -29,19 +28,13 @@ import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
 import com.securescm.shipment.util.Util;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 /**
@@ -135,7 +128,7 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
         
         if (item != null && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
             if (request.getStatus() == 1) {
-                item.setStatus(new ShipmentItemStatus(AppConstants.ITEM_DELIVRED));
+                item.setStatus(new ShipmentItemStatus(AppConstants.ITEM_DELIVERED));
                // shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_DELIVERED));
             } else if (request.getStatus() == 2) {
                 item.setStatus(new ShipmentItemStatus(AppConstants.REJECTED_ON_RETAILER));
@@ -164,7 +157,7 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
                 item.setStatus(new ShipmentItemStatus(AppConstants.ITEM_ON_DELIVERY));
                // shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_ON_DELIVERY));
             } else if (request.getStatus() == 2) {
-                item.setStatus(new ShipmentItemStatus(AppConstants.REJECTED_ON_PROVIDER));
+              //  item.setStatus(new ShipmentItemStatus(AppConstants.REJECTED_ON_PROVIDER));
             }
             
             item.setCheckedBy(userModel.getId());
@@ -181,9 +174,9 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
             //log.info(Boolean.toString(match));
             
             if (match) {
-                shipment.setStatus(new ShipmentStatus(AppConstants.ON_DELIVERY));
+                shipment.setStatus(new ShipmentStatus(AppConstants.FULLY_ASSIGNED));
             } else if (found) {
-                shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_ON_DELIVERY));
+                shipment.setStatus(new ShipmentStatus(AppConstants.PARTIALLY_ASSIGNED));
             }
 
             shipmentDao.save(shipment);

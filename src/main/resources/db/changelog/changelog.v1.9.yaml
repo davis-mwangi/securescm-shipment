@@ -1,0 +1,712 @@
+databaseChangeLog:
+ - changeSet:
+    id: 65
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: loaded_quantity
+            type: double
+        schemaName:
+        tableName: shipment_item
+        
+ - changeSet:
+    id: 66
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: received_quantity
+            type: double
+        schemaName:
+        tableName: shipment_item   
+        
+        
+ - changeSet:
+      id: 67
+      author: David
+      changes:
+        - createTable:
+            tableName: shipment_sub_item
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: shipment
+                  type: int
+                  constraints:
+                    nullable: false
+              - column:
+                  name: shipment_item
+                  type: int
+                  constraints:
+                    nullable: false 
+              - column:
+                  name: vehicle
+                  type: int
+              - column:
+                  name: driver
+                  type: int
+              - column:
+                  name: quantity
+                  type: double
+              - column:
+                  name: status
+                  type: int
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_last_updated
+                  type: datetime
+              - column:
+                  name: date_deleted
+                  type: datetime        
+ - changeSet:
+      id: 68
+      author: David
+      changes:
+        - createTable:
+            tableName: shipment_sub_item_status
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+ - changeSet:
+      id: 69
+      author: David
+      changes:
+        - createTable:
+            tableName: driver
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: first_name
+                  type: varchar(45) 
+              - column:
+                  name: last_name
+                  type: varchar(45) 
+              - column:
+                  name: national_id
+                  type: varchar(25)
+              - column:
+                  name: phone_number
+                  type: varchar(25) 
+              - column:
+                  name: licence_no
+                  type: varchar(25)
+              - column:
+                  name: transporter
+                  type: INT   
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_last_updated
+                  type: datetime
+              - column:
+                  name: date_deleted
+                  type: datetime       
+ 
+ - changeSet:
+      id: 70
+      author: David
+      changes:
+        - createTable:
+            tableName: vehicle
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: registration_no
+                  type: varchar(45) 
+              - column:
+                  name: transporter
+                  type: INT 
+              - column:
+                  name: driver
+                  type: INT
+              - column:
+                  name: type
+                  type: INT
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_last_updated
+                  type: datetime
+              - column:
+                  name: date_deleted
+                  type: datetime       
+ - changeSet:
+      id: 71
+      author: David
+      changes:
+        - createTable:
+            tableName: vehicle_type
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(45) 
+                            
+ - changeSet:
+      id: 72
+      author: David
+      changes:
+        - createTable:
+            tableName: driver_vehicle
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: driver
+                  type: INT
+              - column:
+                  name: vehicle
+                  type: INT  
+              - column:
+                  name: transporter
+                  type: INT     
+              - column:
+                  name: date_assigned
+                  type: DATE  
+              - column:
+                  name: assignment_end_date
+                  type: DATE 
+              - column:
+                  name: status
+                  type: INT    
+ - changeSet:
+      id: 73
+      author: David
+      changes:
+        - createTable:
+            tableName: drive_vehicle_status
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: INT                 
+        
+ - changeSet:
+      id: 74
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: shipment
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_shipment
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment 
+ - changeSet:
+      id: 75
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: shipment_item
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_shipment_item
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment_item
+            
+ - changeSet:
+      id: 76
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: vehicle
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_vehicle
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: vehicle   
+            
+ - changeSet:
+      id: 77
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: driver
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_driver
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: driver 
+            
+ - changeSet:
+      id: 78
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_status
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: shipment_sub_item_status 
+ - changeSet:
+      id: 79
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: driver
+            constraintName: fk_driver_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter   
+            
+ - changeSet:
+      id: 80
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: vehicle
+            constraintName: fk_vehicle_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter
+            
+ - changeSet:
+      id: 81
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: type
+            baseTableName: vehicle
+            constraintName: fk_vehicle_vehicle_type
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: vehicle_type 
+ - changeSet:
+      id: 82
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: driver
+            baseTableName: vehicle
+            constraintName: fk_vehicle_driver
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: driver 
+            
+ - changeSet:
+      id: 83
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: driver
+            baseTableName: driver_vehicle
+            constraintName: fk_driver_vehicle_driver
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: driver
+ - changeSet:
+      id: 84
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: vehicle
+            baseTableName: driver_vehicle
+            constraintName: fk_driver_vehicle_vehicle
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: vehicle   
+ 
+ - changeSet:
+      id: 85
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: driver_vehicle
+            constraintName: fk_driver_vehicle_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: transporter 
+            
+ - changeSet:
+      id: 86
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: driver_vehicle
+            constraintName: fk_driver_vehicle_drive_vehicle_status
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: RESTRICT
+            referencedColumnNames: id
+            referencedTableName: drive_vehicle_status 
+ - changeSet:
+      id: 87
+      author: David
+      changes:
+        - dropForeignKeyConstraint:
+            baseTableName: vehicle
+            constraintName: fk_vehicle_driver 
+            
+ - changeSet:
+      id: 88
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: driver
+            baseTableName: vehicle
+            constraintName: fk_vehicle_driver
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: SET NULL
+            referencedColumnNames: id
+            referencedTableName: driver   
+ - changeSet:
+      id: 89
+      author: David
+      changes:
+        - renameColumn:
+            catalogName: 
+            columnDataType: VARCHAR(50)
+            newColumnName: name
+            oldColumnName: name
+            remarks: 
+            schemaName: 
+            tableName: drive_vehicle_status 
+            
+ - changeSet:
+    id: 90
+    author: David
+    changes:
+    - renameTable:
+        catalogName: 
+        newTableName: driver_vehicle_status
+        oldTableName: drive_vehicle_status
+        schemaName:   
+            
+ - changeSet:
+      id: 91
+      author: David
+      changes:
+        - createTable:
+            tableName: sub_shipment
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: shipment
+                  type: INT
+              - column:
+                  name: name
+                  type: varchar(255)  
+              - column:
+                  name: vehicle
+                  type: INT     
+              - column:
+                  name: status
+                  type: INT  
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_last_updated
+                  type: datetime(6)
+              - column:
+                  name: date_deleted
+                  type: datetime(6)
+ - changeSet:
+    id: 93
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: sub_shipment
+            type: int
+        schemaName:
+        tableName:  shipment_sub_item    
+        
+ - changeSet:
+      id: 94
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: sub_shipment
+            baseTableName: shipment_sub_item
+            constraintName: fk_shipment_sub_item_sub_shipment
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: SET NULL
+            referencedColumnNames: id
+            referencedTableName: sub_shipment      
+ - changeSet:
+      id: 95
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: shipment
+            baseTableName: sub_shipment
+            constraintName: fk_sub_shipment_shipment
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: SET NULL
+            referencedColumnNames: id
+            referencedTableName: shipment  
+            
+ - changeSet:
+      id: 96
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: vehicle
+            baseTableName: sub_shipment
+            constraintName: fk_sub_shipment_vehicle
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: SET NULL
+            onUpdate: SET NULL
+            referencedColumnNames: id
+            referencedTableName: vehicle
+            
+ - changeSet:
+      id: 97
+      author: David
+      changes:
+        - createTable:
+            tableName: sub_shipment_status
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(100)   
+ - changeSet:
+      id: 98
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: status
+            baseTableName: sub_shipment
+            constraintName: fk_sub_shipment_sub_shipment_status
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: CASCADE
+            onUpdate: SET NULL
+            referencedColumnNames: id
+            referencedTableName: sub_shipment_status  
+ - changeSet:
+    id: 99
+    author: David
+    changes:
+    - dropForeignKeyConstraint:
+        baseTableName: sub_shipment
+        constraintName: fk_sub_shipment_shipment  
+ - changeSet:
+    id: 100
+    author: David
+    changes:
+    - dropColumn:
+        catalogName: 
+        columnName: shipment
+        schemaName: 
+        tableName: sub_shipment  
+        
+ - changeSet:
+    id: 101
+    author: David
+    changes:
+    - renameTable:
+        catalogName: 
+        newTableName: transporter_shipment
+        oldTableName: sub_shipment
+        schemaName: 
+ - changeSet:
+    id: 102
+    author: David
+    changes:
+    - renameTable:
+        catalogName: 
+        newTableName: transporter_shipment_status
+        oldTableName: sub_shipment_status
+        schemaName:   
+ - changeSet:
+    id: 103
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: transporter
+            type: int
+        schemaName:
+        tableName:   transporter_shipment 
+        
+ - changeSet:
+      id: 104
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: transporter
+            baseTableName: transporter_shipment
+            constraintName: fk_transporter_shipment_transporter
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: transporter    
+ - changeSet:
+    id: 105
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: trips
+            type: int
+        schemaName:
+        tableName:   transporter_shipment  
+ - changeSet:
+    id: 106
+    author: David
+    changes:
+    - renameTable:
+        catalogName: 
+        newTableName: transporter_shipment_item
+        oldTableName:  shipment_sub_item
+        schemaName: 
+ - changeSet:
+    id: 107
+    author: David
+    changes:
+    - renameTable:
+        catalogName: 
+        newTableName: transporter_shipment_item_status
+        oldTableName:  shipment_sub_item_status
+        schemaName: 
+ - changeSet:
+      id: 108
+      author: David
+      changes:
+        - renameColumn:
+            catalogName: 
+            columnDataType: INT
+            newColumnName: transporter_shipment
+            oldColumnName: sub_shipment
+            remarks: 
+            schemaName: 
+            tableName: transporter_shipment_item   
+ - changeSet:
+    id: 109
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: assigned_quantity
+            type: double
+        schemaName:
+        tableName:   shipment_item             
+            
+                          
+            

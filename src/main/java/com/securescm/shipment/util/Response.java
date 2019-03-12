@@ -33,7 +33,21 @@ public enum Response {
     SHIPMENT_CLOSED(16, "Cannot add shipment item, Shipment is closed"),
     TRANSPORTER_ASSIGNED(17,"Transporter is already assigned to a Shipment"),
     PROVIDER_ONLY(18, "Only provider allowed to carry out the process"),
-    TRANSPORTER_ONLY(18, "Only transporter allowed to carry out this process");
+    TRANSPORTER_ONLY(18, "Only transporter allowed to carry out this process"),
+    DRIVER_EXISTS(19, "Driver already registered"),
+    DRIVER_NOT_FOUND(20,"Driver not found"),
+    VEHICLE_NOT_FOUND(21,"Vehicle not found"),
+    VEHICLE_EXISTS(22,"Vehicle already registered"),
+    DRIVER_ASSIGNED(23, "Driver is already assigned to a vehicle"),
+    TRANSPORTER_SHIPEMENT_NOT_FOUND(24, "Transporter Shipment not found"),
+    TRANSPORTER_SHIPEMENT_EXIST(25, "Transporter Shipment already exists"),
+    TRANSPORTER_SHIPEMENT_ITEM_NOT_FOUND(26, "Transporter Shipment item not found"),
+    TRANSPORTER_SHIPEMENT_ITEM_EXIST(27, "Transporter Shipment item already exists"),
+    SHIPMENT_ITEM_FULY_ASSIGNED(28, "Shipment item is fully assigned"),
+    SHIPMENT_ITEM_EXCEEDED(28, "Quantity exceeds the shipment item quantity"),
+    TRANSPORTER_SHIPMENT_CLOSED(29, "Cannot add items, Transporter shipment is closed");
+    
+    
     
     private Status status;
     Response(int code, String message){
