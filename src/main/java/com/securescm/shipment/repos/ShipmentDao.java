@@ -29,7 +29,8 @@ public interface ShipmentDao extends PagingAndSortingRepository<Shipment, Intege
      public Shipment getOneShipment(@Param("id")Integer id);
      
     Page<Shipment> findByCreatedByAndDateDeletedIsNull(Provider provider,Pageable pageable);
-    Page<Shipment>findByTransporterAndDateDeletedIsNull(Transporter transporter,Pageable pageable );
+    @Query(value="SELECT s FROM Shipment s WHERE s.transporter.id = :id AND (s.status.id= 10 OR s.status.id =6) AND dateDeleted = null")
+    Page<Shipment>findByTransporterAndDateDeletedIsNull(@Param("id") Integer transporter,Pageable pageable );
      
     public Shipment findByIdAndDateDeletedIsNull(Integer id);
     @Query(value =" SELECT s FROM Shipment s WHERE s.id = :id AND s.status.id = 9")

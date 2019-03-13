@@ -99,17 +99,17 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
 
     @Override
     public PagedResponse<ShipmentItemModel> getAllShipmentItems(UserModel userModel, String direction, String orderBy, int page, int size) {
-        
-         Pageable pageable = Util.getPageable(page, size, direction, orderBy);
-         
-          Page<ShipmentItem> shipmentItems =null;
-         if(userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")){
-              shipmentItems = shipmentItemDao.findByProvider(new Provider(userModel.getStakeholder().getId()), pageable);
-         }else if(userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")){
-              shipmentItems =  shipmentItemDao.findByRetailer(new Retailer(userModel.getStakeholder().getId()), pageable);
-         }
- 
-        return Util.getResponse(shipmentItems, shipmentItems.map(shipmentItem -> ShipmentItemModel.map(shipmentItem)).getContent());   
+
+        Pageable pageable = Util.getPageable(page, size, direction, orderBy);
+
+        Page<ShipmentItem> shipmentItems = null;
+        if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")) {
+            shipmentItems = shipmentItemDao.findByProvider(new Provider(userModel.getStakeholder().getId()), pageable);
+        } else if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
+            shipmentItems = shipmentItemDao.findByRetailer(new Retailer(userModel.getStakeholder().getId()), pageable);
+        }
+
+        return Util.getResponse(shipmentItems, shipmentItems.map(shipmentItem -> ShipmentItemModel.map(shipmentItem)).getContent());
     }
 
     @Override

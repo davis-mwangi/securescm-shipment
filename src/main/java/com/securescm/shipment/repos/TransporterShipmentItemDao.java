@@ -9,6 +9,8 @@ import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.TransporterShipment;
 import com.securescm.shipment.entities.TransporterShipmentItem;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,4 +27,9 @@ public interface TransporterShipmentItemDao extends JpaRepository<TransporterShi
     
     List<TransporterShipmentItem>findByShipmentItem(ShipmentItem item);
     List<TransporterShipmentItem>findByTransporterShipment(TransporterShipment ts);
+    
+    @Query(value="SELECT t FROM TransporterShipmentItem t WHERE t.retailer.id = :id AND t.status.id = 3 OR  t.status.id = 6")
+    Page<TransporterShipmentItem>findByRetailerAndStatus(@Param("id") Integer retailerId, Pageable pageable);
+    
+    
 }

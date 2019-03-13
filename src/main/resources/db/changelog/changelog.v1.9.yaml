@@ -706,7 +706,43 @@ databaseChangeLog:
             name: assigned_quantity
             type: double
         schemaName:
-        tableName:   shipment_item             
+        tableName:   shipment_item
+        
+ - changeSet:
+    id: 110
+    author: David
+    changes:
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: retailer
+            type: int
+        schemaName:
+        tableName:  transporter_shipment_item
+    - addColumn:
+        catalogName: 
+        columns:
+        - column:
+            name: store_assigned_quantity
+            type: double
+        schemaName:
+        tableName:  transporter_shipment_item
+        
+ - changeSet:
+      id: 111
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: retailer
+            baseTableName: transporter_shipment_item
+            constraintName: fk_transporter_shipment_item_retailer
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: retailer      
             
                           
             

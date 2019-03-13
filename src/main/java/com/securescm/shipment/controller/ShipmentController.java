@@ -101,30 +101,30 @@ public class ShipmentController {
     @PostMapping("/transporter")
     public ResponseEntity assignTransporter(@RequestBody AssignTransporterRequest request, 
             @CurrentUser ApiPrincipal apiPrincipal){
-     List<Shipment> shipments=  shipmentDao.findByTransporterAndCreatedBy(
-             new Transporter(request.getTransporter()), 
-             new Provider(apiPrincipal.getUser().getStakeholder().getId()));
+    // List<Shipment> shipments=  shipmentDao.findByTransporterAndCreatedBy(
+//             new Transporter(request.getTransporter()), 
+//             new Provider(apiPrincipal.getUser().getStakeholder().getId()));
       if(!apiPrincipal.getUser().getRole().getName().equalsIgnoreCase("Provider")){
          return ResponseEntity.status(HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS).body(
                  new SingleItemResponse(Response.PROVIDER_ONLY.status(), null));
      }
      
-    //Check if transporter is already assigned to transporter for given provider
-     if(!shipments.isEmpty()){
-         Shipment ship =  shipmentDao.getOneShipment(request.getShipment());
-        for (Shipment shipment: shipments){
-       
-        LocalDateTime date1 =  LocalDateTime.parse(shipment.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
-        LocalDateTime date2 =  LocalDateTime.parse(ship.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
-        
-           boolean isBefore =   date1.isBefore(date2);
-           if(!isBefore){
-              return ResponseEntity.status(HttpStatus.CONFLICT).body(new SingleItemResponse(Response.TRANSPORTER_ASSIGNED.status(), null));
-           }
-        }
-         //Get date of the shipment and compare with date of the shipemnt been modified
-         
-     }
+//    //Check if transporter is already assigned to transporter for given provider
+//     if(!shipments.isEmpty()){
+//         Shipment ship =  shipmentDao.getOneShipment(request.getShipment());
+//        for (Shipment shipment: shipments){
+//       
+//        LocalDateTime date1 =  LocalDateTime.parse(shipment.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+//        LocalDateTime date2 =  LocalDateTime.parse(ship.getShipmentDate().toString(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"));
+//        
+//           boolean isBefore =   date1.isBefore(date2);
+//           if(!isBefore){
+//              return ResponseEntity.status(HttpStatus.CONFLICT).body(new SingleItemResponse(Response.TRANSPORTER_ASSIGNED.status(), null));
+//           }
+//        }
+//         //Get date of the shipment and compare with date of the shipemnt been modified
+//         
+//     }
       return ResponseEntity.ok(shipmentService.assignTransporter(request)); 
     }
     

@@ -47,10 +47,15 @@ public class TransporterShipmentItem {
     @ManyToOne(optional = false)
     private Driver driver;
     private double quantity;
+    private double storeAssignedQuantity;
     
     @JoinColumn(name = "transporter_shipment", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private TransporterShipment transporterShipment;
+    
+    @JoinColumn(name = "retailer", referencedColumnName = "id")
+    @ManyToOne(optional = false)
+    private Retailer retailer;
    
     @JoinColumn(name = "status", referencedColumnName = "id")
     @ManyToOne(optional = false)

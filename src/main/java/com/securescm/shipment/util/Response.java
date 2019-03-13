@@ -45,7 +45,9 @@ public enum Response {
     TRANSPORTER_SHIPEMENT_ITEM_EXIST(27, "Transporter Shipment item already exists"),
     SHIPMENT_ITEM_FULY_ASSIGNED(28, "Shipment item is fully assigned"),
     SHIPMENT_ITEM_EXCEEDED(28, "Quantity exceeds the shipment item quantity"),
-    TRANSPORTER_SHIPMENT_CLOSED(29, "Cannot add items, Transporter shipment is closed");
+    TRANSPORTER_SHIPMENT_CLOSED(29, "Cannot add items, Transporter shipment is closed"),
+    TRANSPORTER_SHIPEMENT_ITEM_FULLY_ASSIGNED(30, "Item is fully assigned to store(s) "),
+    TRANSPORTER_SHIPEMENT_ITEM_EXCEEDED(31, "Quantity supplied exceeds the initial quantity");
     
     
     

@@ -10,6 +10,13 @@ package com.securescm.shipment.util;
  * @author david
  */
 public interface AppConstants {
+    
+    //Kafka Events
+ 
+    //Event Types {create, delete}
+    String createEvent = "createUpdate";
+    String deleteEvent = "delete";
+    
     //Shipment Status
     int PENDING = 1; //100
     int ACCEPTED = 2; //102
@@ -60,6 +67,8 @@ public interface AppConstants {
     int TRANSPORT_ITEM_DELIVERED = 3;
     int TRANSPORT_ITEM_REJECTED_ON_PROVIDER = 4;
     int TRANSPORT_ITEM_REJECTED_ON_RETAILER = 5;
+    int TRANSPORTER_ITEM_PARTIALLY_ASSIGNED_TO_STORE = 6;
+    int TRANSPORTER_ITEM_FULLY_ASSIGN_TO_STORE = 7;
     
    
 }

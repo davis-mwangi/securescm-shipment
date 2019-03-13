@@ -145,7 +145,7 @@ public class ShipmentServiceImpl implements ShipmentService {
         }
         if (userModel.getRole().getName().equalsIgnoreCase("Transporter")) {
             Page<Shipment> ships = shipmentDao.findByTransporterAndDateDeletedIsNull(
-                    new Transporter(userModel.getStakeholder().getId()),
+                    userModel.getStakeholder().getId(),
                      pageable);
 
             List<ShipmentModel> shipResponses = ships.map(shipment -> {
@@ -155,15 +155,8 @@ public class ShipmentServiceImpl implements ShipmentService {
 
             return Util.getResponse(ships, shipResponses);
         }
-        if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")
-                && userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")) {
-            shipmentItems = shipmentItemDao.findByProviderAndStatus1(userModel.getStakeholder().getId());
 
-        } else if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")
-                && userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")) {
-            shipmentItems = shipmentItemDao.findByRetailerAndStatus2(userModel.getStakeholder().getId());
-
-        } else if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")
+        if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")
                 && userModel.getRole().getName().equalsIgnoreCase("Retailer")) {
             shipmentItems = shipmentItemDao.findByRetailerAndStatus2(userModel.getStakeholder().getId());
         }
@@ -181,28 +174,14 @@ public class ShipmentServiceImpl implements ShipmentService {
         for (Integer shipmentId : uniqueShipmentIds) {
 
             Shipment shipment = shipmentDao.findByIdAndDateDeletedIsNull(shipmentId);
-            if (shipment.getStatus().getId() == 9 && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")
-                && userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")) {
-                List<ShipmentItem> shipItms = new ArrayList<>();
+            List<ShipmentItem> shipItms = new ArrayList<>();
                 for (ShipmentItem shipItem : shipmentItems) {
                     if (shipment.getId() == shipItem.getShipment().getId()) {
                         shipItms.add(shipItem);
                     }
 
-                }
-                shipments.add(ShipmentModel.map(shipment, shipItms));
-            } else if(userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")
-                && userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")){
-                List<ShipmentItem> shipItms = new ArrayList<>();
-                for (ShipmentItem shipItem : shipmentItems) {
-                    if (shipment.getId() == shipItem.getShipment().getId()) {
-                        shipItms.add(shipItem);
-                    }
-
-                }
-                shipments.add(ShipmentModel.map(shipment, shipItms));
             }
-
+            shipments.add(ShipmentModel.map(shipment, shipItms));
         }
         //List for security agents retailer
 
@@ -242,6 +221,8 @@ public class ShipmentServiceImpl implements ShipmentService {
         } else if (userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")
                 && userModel.getRole().getName().equalsIgnoreCase("Provider")) {
             shipmentItems = shipmentItemDao.findByProvider(new Provider(userModel.getStakeholder().getId()));
+        }else if (userModel.getRole().getName().equalsIgnoreCase("Transporter")) {
+            shipmentItems = shipmentItemDao.findAll();
         }
 
         List<ShipmentItem> shipItms = new ArrayList<>();
@@ -249,7 +230,6 @@ public class ShipmentServiceImpl implements ShipmentService {
             if (shipment.getId() == shipItem.getShipment().getId()) {
                 shipItms.add(shipItem);
             }
-
         }
 
         return new SingleItemResponse(Response.SUCCESS.status(), ShipmentModel.map(shipment, shipItms));

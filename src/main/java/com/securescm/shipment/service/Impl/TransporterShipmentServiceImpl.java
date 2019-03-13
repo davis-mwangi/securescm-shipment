@@ -15,10 +15,15 @@ import com.securescm.shipment.entities.TransporterShipmentItem;
 import com.securescm.shipment.entities.TransporterShipmentItemStatus;
 import com.securescm.shipment.entities.TransporterShipmentStatus;
 import com.securescm.shipment.entities.Vehicle;
+import com.securescm.shipment.kafka.MessageProducer;
+import com.securescm.shipment.kafka.models.Inventory;
+import com.securescm.shipment.kafka.models.ProducerEvent;
 import com.securescm.shipment.model.ItemName;
 import com.securescm.shipment.model.Status;
+import com.securescm.shipment.model.TransporterShipmentItemModel;
 import com.securescm.shipment.model.TransporterShipmentModel;
 import com.securescm.shipment.model.UserModel;
+import com.securescm.shipment.payload.AssignTransporterItemStoreRequest;
 import com.securescm.shipment.payload.AuditTransporterItemRequest;
 import com.securescm.shipment.payload.TransporterShipmentItemRequest;
 import com.securescm.shipment.payload.TransporterShipmentRequest;
@@ -29,8 +34,10 @@ import com.securescm.shipment.repos.TransporterShipmentItemDao;
 import com.securescm.shipment.repos.VehicleDao;
 import com.securescm.shipment.service.TransporterShipmentService;
 import com.securescm.shipment.util.AppConstants;
+import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
+import com.securescm.shipment.util.Util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -40,6 +47,9 @@ import java.util.stream.IntStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -65,6 +75,15 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
     
     @Autowired
     private ShipmentDao shipmentDao;
+    
+    @Autowired
+    private MessageProducer producer;
+    
+     
+    @Value(value = "${topic.inventory}")
+    private String inventoryTopic;
+    
+    
 
     @Override
     public SingleItemResponse createUpdateTransporterShipment(TransporterShipmentRequest request, UserModel userModel) {
@@ -119,7 +138,11 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
     @Override
     public SingleItemResponse findTransporterShipment(Integer id) {
         TransporterShipment shipment = transporterShipmentDao.getOne(id);
-        return new SingleItemResponse(Response.SUCCESS.status(), TransporterShipmentModel.map(shipment));
+
+        List<TransporterShipmentItem> transShipItms = transporterShipmentItemDao.findByTransporterShipment(shipment);
+       
+
+        return new SingleItemResponse(Response.SUCCESS.status(), TransporterShipmentModel.map(shipment, transShipItms));
     }
 
     
@@ -129,14 +152,17 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         TransporterShipmentItem tsi = new TransporterShipmentItem();
         ShipmentItem shipmentItem = shipmentItemDao.getOneShipmentItem(request.getShipmentItem());
         int shipmentItemStatus = 0;
+        double tsiQuantity = 0;
         double assignedQuantity = 0;
         if (request.getStatus().equalsIgnoreCase("FA")) {
-            assignedQuantity = request.getQuantity();
+            assignedQuantity = shipmentItem.getQuantity();
+            tsiQuantity = assignedQuantity;
             shipmentItemStatus = AppConstants.ITEM_FULY_ASSIGNED;
         } else if (request.getStatus().equalsIgnoreCase("PA")) {
             if (shipmentItem.getQuantity() > shipmentItem.getAssignedQuantity()) {
                 assignedQuantity = shipmentItem.getAssignedQuantity() + request.getQuantity();
                 shipmentItemStatus = AppConstants.ITEM_PARTIALLY_ASSIGNED;
+                tsiQuantity = request.getQuantity();
             } 
 
         }
@@ -149,7 +175,8 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         tsi.setDriver(transporterShipment.getVehicle().getDriver());
         tsi.setVehicle(transporterShipment.getVehicle());
         tsi.setDateCreated(new Date());
-        tsi.setQuantity(request.getQuantity());
+        tsi.setQuantity(tsiQuantity);
+        tsi.setRetailer(shipmentItem.getRetailer());
         tsi.setShipmentItem(new ShipmentItem(request.getShipmentItem()));
         tsi.setStatus(new TransporterShipmentItemStatus(AppConstants.TRANSPORT_ITEM_PENDING));
         tsi.setTransporterShipment(new TransporterShipment(request.getTransporterShipment()));
@@ -251,8 +278,8 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         int tsiStatus = 0;
         int transporterShipStatus = 0;
         String stakeHolder ="";
-        if (userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")
-                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Provider")) {
+        if (userModel.getRole().getName().equalsIgnoreCase("ProviderSecurityAgent")
+                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Insurance")) {
             int status = 2;
             if (request.getStatus().equalsIgnoreCase("APPROVE")) {
                 tsiStatus = AppConstants.TRANSPORT_ITEM_ON_DELIVERY;                
@@ -267,8 +294,8 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
             
         }
         
-        if (userModel.getRole().getName().equalsIgnoreCase("SecurityAgent")
-                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
+        if (userModel.getRole().getName().equalsIgnoreCase("RetailerSecurityAgent")
+                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Insurance")) {
              int retailerCheckStatus = 3;
             if (request.getStatus().equalsIgnoreCase("APPROVE")) {
                 tsiStatus = AppConstants.TRANSPORT_ITEM_DELIVERED;                
@@ -389,7 +416,7 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
             log.info("Retailer:" + Boolean.toString(found));
             log.info("Retailer:"+Boolean.toString(match));
             if (match) {
-                tShipment.setStatus(new TransporterShipmentStatus(AppConstants.TRANSPORTER_SHIPMENT_ON_DELIVERY));
+                tShipment.setStatus(new TransporterShipmentStatus(AppConstants.TRANSPORTER_SHIPMENT_DELIVERED));
             } else if (found) {
                 tShipment.setStatus(new TransporterShipmentStatus(AppConstants.TRANSPORTER_SHIPMENT_PARTIALLY_DELIVERED));
             }
@@ -398,6 +425,75 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         transporterShipmentDao.save(tShipment);
     }
     
+    // Get Transporter Shipment
+    @Override
+    public PagedResponse<TransporterShipmentModel> getTransporterShipments(UserModel userModel, String direction, String orderBy, int page, int size) {
+        Pageable pageable = Util.getPageable(page, size, direction, orderBy);
+        Page<TransporterShipment> transporterShips = null;
+        if (userModel.getRole().getName().equalsIgnoreCase("ProviderSecurityAgent")
+                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Insurance")) {
+            transporterShips = transporterShipmentDao.findTransporterShipmentsProviderAgent(pageable);
+        } else if (userModel.getRole().getName().equalsIgnoreCase("RetailerSecurityAgent")
+                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Insurance")) {
+            transporterShips = transporterShipmentDao.findTransporterShipmentsRetailerAgent(pageable);
+        } else if (userModel.getRole().getName().equalsIgnoreCase("Transporter")) {
+            transporterShips = transporterShipmentDao.findByTransporter(new Transporter(userModel.getStakeholder().getId()), pageable);
+        }
+
+        //Fetch transporter shipment items only for retaieler with status delivered
+        if (userModel.getRole().getName().equalsIgnoreCase("Retailer")
+                && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
+            Page<TransporterShipmentItem> transporterShipItems = transporterShipmentItemDao.findByRetailerAndStatus(userModel.getStakeholder().getId(), pageable);
+            return Util.getResponse(transporterShipItems, transporterShipItems.map(ts -> {
+                return TransporterShipmentItemModel.map(ts);
+            }).getContent());
+        }
+
+        //log.info(transporterShips.toString());
+        return Util.getResponse(transporterShips, transporterShips.map(ts -> {
+            return TransporterShipmentModel.map(ts, null);
+        }).getContent());
+
+    }
+    
+    
+    
+    
+    /////Assign Transporter Shipment Item to Store/////////////////////////////
+    @Override
+     public SingleItemResponse assignTransporterShipmentItemToStore(AssignTransporterItemStoreRequest request, UserModel userModel){
+         TransporterShipmentItem tShipmentItem = transporterShipmentItemDao.getOne(request.getTransporterShipmentItem());
+         int status = 0;
+         double assignedQuantity = 0;
+         double storeQuantity = 0;
+         if(request.getStatus().equalsIgnoreCase("FA")){
+             status = AppConstants.TRANSPORTER_ITEM_FULLY_ASSIGN_TO_STORE;
+             assignedQuantity = tShipmentItem.getQuantity();
+             storeQuantity = assignedQuantity;
+         }else if(request.getStatus().equalsIgnoreCase("PA")){
+             status = AppConstants.TRANSPORTER_ITEM_PARTIALLY_ASSIGNED_TO_STORE; 
+             assignedQuantity = tShipmentItem.getStoreAssignedQuantity() + request.getQuantity();
+             storeQuantity = request.getQuantity();
+        }
+        tShipmentItem.setStoreAssignedQuantity(assignedQuantity);
+        tShipmentItem.setStatus(new TransporterShipmentItemStatus(status));
+        tShipmentItem = transporterShipmentItemDao.save(tShipmentItem);
+        
+        if(tShipmentItem.getQuantity() == tShipmentItem.getStoreAssignedQuantity()){
+            tShipmentItem.setStatus(new TransporterShipmentItemStatus(AppConstants.TRANSPORTER_ITEM_FULLY_ASSIGN_TO_STORE));
+            transporterShipmentItemDao.save(tShipmentItem);
+        }
+        ProducerEvent event =  new ProducerEvent(AppConstants.createEvent, new Inventory(
+                    request.getStore(),
+                    tShipmentItem.getRetailer().getId(),
+                    tShipmentItem.getShipmentItem().getProvider().getId(), 
+                    tShipmentItem.getShipmentItem().getProduct().getId(), 
+                    storeQuantity));
+        producer.publish(inventoryTopic, Util.toJson(event));
+        
+        log.info("Provider: " + tShipmentItem.getShipmentItem().getProvider().getId() + "Store:"+request.getStore()+ ", Retailer: "+ tShipmentItem.getRetailer().getId()+ ", Product:"+tShipmentItem.getShipmentItem().getProduct().getId() + ", Quantity :" + storeQuantity);
+        return new SingleItemResponse(Response.SUCCESS.status(), new ItemName(tShipmentItem.getId())); 
+     }
     
     
 }

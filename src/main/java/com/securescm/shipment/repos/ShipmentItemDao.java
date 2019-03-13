@@ -42,5 +42,9 @@ public interface  ShipmentItemDao extends  JpaRepository<ShipmentItem,Integer>{
     List<ShipmentItem>findByRetailerAndStatus2(@Param("id") Integer id);
     
     List<ShipmentItem>findByProvider(Provider provider);
+    
+    
+    
+    
  
 }

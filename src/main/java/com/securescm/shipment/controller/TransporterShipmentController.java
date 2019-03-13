@@ -15,6 +15,7 @@ import com.securescm.shipment.security.CurrentUser;
 import com.securescm.shipment.service.TransporterShipmentService;
 import com.securescm.shipment.util.AppConstants;
 import com.securescm.shipment.util.ListItemResponse;
+import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
 import com.securescm.shipment.util.Util;
@@ -50,24 +51,22 @@ public class TransporterShipmentController {
             @CurrentUser ApiPrincipal principal){ 
         return ResponseEntity.ok().body(service.createUpdateTransporterShipment(request, 
                 principal.getUser()));
-    }  
-    @GetMapping
+    }
+
+    @GetMapping("/all")
     public ResponseEntity getAllTransporterShipment(
             @RequestParam(value = "direction", defaultValue = AppConstants.DEFAULT_ORDER_DIRECTION) String direction,
             @RequestParam(value = "oderBy", defaultValue = AppConstants.DEFAULT_ORDER_BY) String orderBy,
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
             @CurrentUser ApiPrincipal principal) {
-          
-           Page<TransporterShipment> vehicles = transporterShipmentDao.findByTransporter(
-                   new Transporter(principal.getUser().getStakeholder().getId()),
-                    Util.getPageable(page,size,direction,orderBy));
-             
-           
-           return  Util.getResponse(Response.SUCCESS.status(), Util.getResponse(vehicles, vehicles.map(ts -> {
-                    return  TransporterShipmentModel.map(ts);
-                }).getContent())); 
-    
+        Page<TransporterShipment> vehicles = transporterShipmentDao.findByTransporter(
+                new Transporter(principal.getUser().getStakeholder().getId()),
+                Util.getPageable(page, size, direction, orderBy));
+
+        return Util.getResponse(Response.SUCCESS.status(), Util.getResponse(vehicles, vehicles.map(ts -> {
+            return TransporterShipmentModel.map(ts, null);
+        }).getContent()));
     }
     
     @GetMapping("/{id}")
@@ -109,6 +108,16 @@ public class TransporterShipmentController {
 
      }
     return ResponseEntity.ok().body(service.openTransporterShipment(id));
+    }
+    
+    @GetMapping
+    public PagedResponse<TransporterShipmentModel> getTransporterShipments(
+            @RequestParam(value = "direction", defaultValue = AppConstants.DEFAULT_ORDER_DIRECTION) String direction,
+            @RequestParam(value = "oderBy", defaultValue = AppConstants.DEFAULT_ORDER_BY)  String orderBy,
+            @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
+            @RequestParam(value= "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
+            @CurrentUser ApiPrincipal apiPrincipal){
+       return service.getTransporterShipments(apiPrincipal.getUser(), direction, orderBy, page, size);
     }
 
 }

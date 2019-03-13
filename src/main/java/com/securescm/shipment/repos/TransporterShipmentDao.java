@@ -5,6 +5,7 @@
  */
 package com.securescm.shipment.repos;
 
+import com.securescm.shipment.entities.Retailer;
 import com.securescm.shipment.entities.Transporter;
 import com.securescm.shipment.entities.TransporterShipment;
 import java.util.List;
@@ -26,4 +27,12 @@ public interface TransporterShipmentDao extends JpaRepository<TransporterShipmen
     List<TransporterShipment>findByTransporter(Transporter transporter);
     Page<TransporterShipment>findByTransporter(Transporter transporter, Pageable pageable);
     boolean existsByIdAndTransporter(Integer id, Transporter transporter);
+    
+    @Query(value="SELECT t FROM TransporterShipment t WHERE t.status.id= 2 OR t.status.id =3  AND dateDeleted = null")
+    Page<TransporterShipment>findTransporterShipmentsProviderAgent(Pageable pageable );
+    
+    @Query(value="SELECT t FROM TransporterShipment t WHERE t.status.id= 4 OR t.status.id =5  AND dateDeleted = null")
+    Page<TransporterShipment>findTransporterShipmentsRetailerAgent(Pageable pageable );
+    
+   
 }

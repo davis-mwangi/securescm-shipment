@@ -31,6 +31,9 @@ public class ShipmentItemModel {
     private ShipCustom shipment;
 
     private double quantity;
+    private double loadedQuantity;
+    private double receivedQuantity;
+    private double assignedQuantity;
 
     private Retailer retailer;
     
@@ -47,6 +50,9 @@ public class ShipmentItemModel {
         model.setId(sim.getId());
         model.setProduct(sim.getProduct());
         model.setQuantity(sim.getQuantity());
+        model.setAssignedQuantity(sim.getAssignedQuantity());
+        model.setLoadedQuantity(sim.getLoadedQuantity());
+        model.setReceivedQuantity(sim.getReceivedQuantity());
         model.setShipment(new ShipCustom(
                 sim.getShipment().getId(),
                 sim.getShipment().getCode(),

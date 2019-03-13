@@ -8,6 +8,7 @@ package com.securescm.shipment.controller;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.TransporterShipment;
 import com.securescm.shipment.entities.TransporterShipmentItem;
+import com.securescm.shipment.payload.AssignTransporterItemStoreRequest;
 import com.securescm.shipment.payload.AuditTransporterItemRequest;
 import com.securescm.shipment.payload.SecurityCheckRequest;
 import com.securescm.shipment.payload.TransporterShipmentItemRequest;
@@ -112,12 +113,27 @@ public class TransporterShipmentItemController {
         return ResponseEntity.ok().body(service.deleteTransporterShipmentItem(id));
     }
     
-     @PostMapping("/check")
+    @PostMapping("/check")
     public ResponseEntity approveTransporterShipmentItem(@CurrentUser ApiPrincipal apiPrincipal,
             @RequestBody AuditTransporterItemRequest request){
         
         return ResponseEntity.ok().body(service.auditTransporterShipmentItem(request, apiPrincipal.getUser()));  
                
    
+    }
+    
+    @PostMapping("/store/assign")
+    public ResponseEntity approveTransporterShipmentItem(@CurrentUser ApiPrincipal apiPrincipal,
+            @RequestBody AssignTransporterItemStoreRequest request) {
+        TransporterShipmentItem item = transporterShipmentItemDao.getOne(request.getTransporterShipmentItem());
+        if(item.getQuantity() == item.getStoreAssignedQuantity()){
+             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body( new SingleItemResponse(Response.TRANSPORTER_SHIPEMENT_ITEM_FULLY_ASSIGNED.status(), null));
+        }
+        //Check if the quantity been assigned is greater than the current transporter shipment item quantity
+        else if((item.getStoreAssignedQuantity()+ request.getQuantity()) > item.getQuantity()){
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body( new SingleItemResponse(Response.TRANSPORTER_SHIPEMENT_ITEM_EXCEEDED.status(), null));
+        }
+        return ResponseEntity.ok().body(service.assignTransporterShipmentItemToStore(request, apiPrincipal.getUser()));
+
     }
 }
