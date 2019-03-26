@@ -5,20 +5,29 @@
  */
 package com.securescm.shipment.service.Impl;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.securescm.shipment.entities.OrderItem;
+import com.securescm.shipment.entities.OrderItemPropertyValue;
+import com.securescm.shipment.entities.PropertyValue;
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Retailer;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.ShipmentItemStatus;
 import com.securescm.shipment.entities.ShipmentStatus;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import com.securescm.shipment.model.ItemName;
+import com.securescm.shipment.model.ItemValue;
 import com.securescm.shipment.model.ShipmentItemModel;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.SecurityCheckRequest;
 import com.securescm.shipment.payload.ShipmentItemRequest;
 import com.securescm.shipment.repos.OrderDao;
 import com.securescm.shipment.repos.OrderItemDao;
+import com.securescm.shipment.repos.OrderItemPropertyValueDao;
+import com.securescm.shipment.repos.PropertyDao;
+import com.securescm.shipment.repos.PropertyValueDao;
 import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
 import com.securescm.shipment.service.ShipmentItemService;
@@ -57,6 +66,15 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
 
     @Autowired
     private ShipmentDao shipmentDao;
+    
+    @Autowired
+    private PropertyDao propertyDao;
+    
+    @Autowired
+    private PropertyValueDao propertyValueDao;
+    
+    @Autowired
+    private OrderItemPropertyValueDao orderItemPropertyValueDao;
 
     @Override
     public SingleItemResponse createUpdateShipmentItem(ShipmentItemRequest request) {
@@ -109,14 +127,14 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
             shipmentItems = shipmentItemDao.findByRetailer(new Retailer(userModel.getStakeholder().getId()), pageable);
         }
 
-        return Util.getResponse(shipmentItems, shipmentItems.map(shipmentItem -> ShipmentItemModel.map(shipmentItem)).getContent());
+        return Util.getResponse(shipmentItems, shipmentItems.map(shipmentItem -> ShipmentItemModel.map(shipmentItem, getOrderItemProperties(shipmentItem))).getContent());
     }
 
     @Override
     public SingleItemResponse findOneShipmentItem(Integer id) {
         ShipmentItem item = shipmentItemDao.getOneShipmentItem(id);
 
-        return new SingleItemResponse(Response.SUCCESS.status(), ShipmentItemModel.map(item));
+        return new SingleItemResponse(Response.SUCCESS.status(), ShipmentItemModel.map(item,getOrderItemProperties(item)) );
     }
 
     @Override
@@ -195,5 +213,39 @@ public class ShipmentItemServiceImpl implements ShipmentItemService {
         //Convert Integer array to int array
         return statusIds.stream().mapToInt(i -> i).toArray();
     }
+    
+    public List<PropertyValuesModel> getOrderItemProperties(ShipmentItem  shipmentItem) {
+       
+        List<OrderItemPropertyValue> orderItemProperties = orderItemPropertyValueDao.findByOrderItem(shipmentItem.getOrderItem().getId());
 
+        List<Integer> propertyValueIds = new ArrayList<>();
+        for (OrderItemPropertyValue ppv : orderItemProperties) {
+            propertyValueIds.add(ppv.getPropertyValue());
+        }
+      
+        return getPropertyValues(propertyValueIds);
+    }
+    
+    public  List<PropertyValuesModel> getPropertyValues(List<Integer> propertyValueIds) {
+        ListMultimap<String, ItemValue> propertyValues = ArrayListMultimap.create();
+        for (Integer pvid : propertyValueIds) {
+            PropertyValue pValue = propertyValueDao.getOne(pvid);
+            propertyValues.put(pValue.getProperty().getName(), new ItemValue(pValue.getId(), pValue.getValue()));
+        }
+        // log.info("Key values" + propertyValues);
+        List<PropertyValuesModel> propertyValuesModel = new ArrayList<>();
+        // log.info("Key values" + propertyValues);
+        for (String property : propertyValues.keySet()) {
+            List<ItemValue> values = propertyValues.get(property);
+            PropertyValuesModel model = new PropertyValuesModel();
+            model.setProperty(property.toLowerCase());
+            model.setValues(values);
+            //  log.info("Key" + property);
+            // log.info("Key" + values);
+            propertyValuesModel.add(model);
+        }
+        return propertyValuesModel;
+    }
+    
+    
 }

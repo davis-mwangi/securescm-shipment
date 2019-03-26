@@ -10,7 +10,9 @@ import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Retailer;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.ShipmentItemStatus;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import java.util.Date;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,8 +46,9 @@ public class ShipmentItemModel {
     private Date orderRequiredDate;
     
     private ShipmentItemStatus status;
+    List<PropertyValuesModel>properties;
 
-    public static ShipmentItemModel map(ShipmentItem sim) {
+    public static ShipmentItemModel map(ShipmentItem sim, List<PropertyValuesModel>properties) {
         ShipmentItemModel model = new ShipmentItemModel();
         model.setId(sim.getId());
         model.setProduct(sim.getProduct());
@@ -67,6 +70,7 @@ public class ShipmentItemModel {
         model.setProvider(sim.getOrderItem().getProvider());
         model.setOrderDate(null);
         model.setOrderRequiredDate(sim.getOrderItem().getDateRequired());
+        model.setProperties(properties);
 
         return model;
 

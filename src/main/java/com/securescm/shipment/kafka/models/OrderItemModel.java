@@ -7,8 +7,8 @@ package com.securescm.shipment.kafka.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.securescm.shipment.model.Item;
-import com.securescm.shipment.model.ItemName;
 import java.util.Date;
+import java.util.List;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -37,5 +37,6 @@ public class OrderItemModel {
     private String retailerAction;
     private Date retailerAckDate;
     private Integer retailerAckBy;
+    List<PropertyValuesModel> properties;
     
 }

@@ -57,9 +57,9 @@ public class ShipmentModel {
     
     private Provider createdBy;
     
-    private List<ShipItem>shipmentItems;
+    private List<ShipmentItemModel>shipmentItems;
     
-    public static ShipmentModel map(Shipment shipment,List<ShipmentItem> items){
+    public static ShipmentModel map(Shipment shipment,List<ShipmentItemModel> shipItmModels){
       ShipmentModel model =  new ShipmentModel();
       model.setId(shipment.getId());
       model.setTransaction(shipment.getTransaction());
@@ -77,17 +77,7 @@ public class ShipmentModel {
       model.setStatus(shipment.getStatus());
       model.setCreatedBy(shipment.getCreatedBy());
       
-      List<ShipItem>shipItems =  new ArrayList<>();
-      for(ShipmentItem item: items){
-         shipItems.add(new ShipItem(
-                item.getId(), 
-                item.getProduct(), 
-                item.getOrderItem().getRetailer(), 
-                item.getOrderItem().getDateRequired(),
-                item.getOrderItem().getDateRequired(),
-                item.getStatus()));
-      }
-      model.setShipmentItems(shipItems);
+      model.setShipmentItems(shipItmModels);
      
       return model;
     }

@@ -7,9 +7,12 @@ package com.securescm.shipment.controller;
 
 import com.securescm.shipment.entities.Transporter;
 import com.securescm.shipment.entities.TransporterShipment;
+import com.securescm.shipment.entities.TransporterShipmentItem;
+import com.securescm.shipment.model.TransporterShipmentItemModel;
 import com.securescm.shipment.model.TransporterShipmentModel;
 import com.securescm.shipment.payload.TransporterShipmentRequest;
 import com.securescm.shipment.repos.TransporterShipmentDao;
+import com.securescm.shipment.repos.TransporterShipmentItemDao;
 import com.securescm.shipment.security.ApiPrincipal;
 import com.securescm.shipment.security.CurrentUser;
 import com.securescm.shipment.service.TransporterShipmentService;
@@ -19,6 +22,8 @@ import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.Response;
 import com.securescm.shipment.util.SingleItemResponse;
 import com.securescm.shipment.util.Util;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -45,6 +50,9 @@ public class TransporterShipmentController {
     @Autowired
     private TransporterShipmentDao  transporterShipmentDao;
     
+    @Autowired
+    private TransporterShipmentItemDao transporterShipmentItemDao;
+    
      
     @PostMapping
     public ResponseEntity createTransporterShipment(@RequestBody TransporterShipmentRequest request,
@@ -60,12 +68,17 @@ public class TransporterShipmentController {
             @RequestParam(value = "page", defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
             @CurrentUser ApiPrincipal principal) {
-        Page<TransporterShipment> vehicles = transporterShipmentDao.findByTransporter(
+        Page<TransporterShipment> transporterShipments = transporterShipmentDao.findByTransporter(
                 new Transporter(principal.getUser().getStakeholder().getId()),
                 Util.getPageable(page, size, direction, orderBy));
 
-        return Util.getResponse(Response.SUCCESS.status(), Util.getResponse(vehicles, vehicles.map(ts -> {
-            return TransporterShipmentModel.map(ts, null);
+        return Util.getResponse(Response.SUCCESS.status(), Util.getResponse(transporterShipments, transporterShipments.map(ts -> {
+            List<TransporterShipmentItem> transShipItms = transporterShipmentItemDao.findByTransporterShipment(ts);
+            List<TransporterShipmentItemModel> transShipItemModel = new ArrayList<>();
+            for (TransporterShipmentItem tsi : transShipItms) {
+                transShipItemModel.add(TransporterShipmentItemModel.map(tsi, service.getTransporterItemProperties(tsi)));
+            }
+            return TransporterShipmentModel.map(ts, transShipItemModel);
         }).getContent()));
     }
     

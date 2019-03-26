@@ -5,6 +5,8 @@
  */
 package com.securescm.shipment.service;
 
+import com.securescm.shipment.entities.TransporterShipmentItem;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import com.securescm.shipment.model.TransporterShipmentModel;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.AssignTransporterItemStoreRequest;
@@ -13,6 +15,7 @@ import com.securescm.shipment.payload.TransporterShipmentItemRequest;
 import com.securescm.shipment.payload.TransporterShipmentRequest;
 import com.securescm.shipment.util.PagedResponse;
 import com.securescm.shipment.util.SingleItemResponse;
+import java.util.List;
 
 /**
  *
@@ -32,4 +35,5 @@ public interface TransporterShipmentService {
     public SingleItemResponse findTransporterShipmentItem(Integer id);
     public SingleItemResponse auditTransporterShipmentItem(AuditTransporterItemRequest request, UserModel userModel);
     public SingleItemResponse assignTransporterShipmentItemToStore(AssignTransporterItemStoreRequest request, UserModel userModel);
+    public List<PropertyValuesModel> getTransporterItemProperties(TransporterShipmentItem  transporterShipmentItem);
 }

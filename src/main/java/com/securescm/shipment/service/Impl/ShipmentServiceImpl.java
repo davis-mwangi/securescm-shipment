@@ -5,20 +5,29 @@
  */
 package com.securescm.shipment.service.Impl;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.securescm.shipment.payload.AssignTransporterRequest;
 import com.securescm.shipment.entities.Country;
+import com.securescm.shipment.entities.OrderItemPropertyValue;
+import com.securescm.shipment.entities.PropertyValue;
 import com.securescm.shipment.entities.Provider;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.ShipmentStatus;
 import com.securescm.shipment.entities.Transaction;
 import com.securescm.shipment.entities.Transporter;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import com.securescm.shipment.model.ItemName;
+import com.securescm.shipment.model.ItemValue;
+import com.securescm.shipment.model.ShipmentItemModel;
 import com.securescm.shipment.model.ShipmentModel;
 import com.securescm.shipment.model.Status;
 import com.securescm.shipment.model.UserModel;
 import com.securescm.shipment.payload.ApproveTransporterRequest;
 import com.securescm.shipment.payload.ShipmentRequest;
+import com.securescm.shipment.repos.OrderItemPropertyValueDao;
+import com.securescm.shipment.repos.PropertyValueDao;
 import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
 import com.securescm.shipment.repos.TransactionDao;
@@ -57,6 +66,12 @@ public class ShipmentServiceImpl implements ShipmentService {
 
     @Autowired
     private TransactionDao transactionDao;
+    
+    @Autowired
+    private PropertyValueDao propertyValueDao;
+    
+    @Autowired
+    private OrderItemPropertyValueDao  orderItemPropertyValueDao;
 
     @Override
     public SingleItemResponse createUpdateShipment(ShipmentRequest request, UserModel userModel) {
@@ -138,7 +153,12 @@ public class ShipmentServiceImpl implements ShipmentService {
 
             List<ShipmentModel> shipResponses = ships.map(shipment -> {
                 List<ShipmentItem> shipItms = shipmentItemDao.findByShipment(shipment);
-                return ShipmentModel.map(shipment, shipItms);
+                List<ShipmentItemModel> shipItmModels = new ArrayList<>();
+                for (ShipmentItem shipItem : shipItms) {
+                    shipItmModels.add(ShipmentItemModel.map(shipItem, getShipmentItemProperties(shipItem)));
+                }
+                
+                return ShipmentModel.map(shipment, shipItmModels);
             }).getContent();
 
             return Util.getResponse(ships, shipResponses);
@@ -150,7 +170,12 @@ public class ShipmentServiceImpl implements ShipmentService {
 
             List<ShipmentModel> shipResponses = ships.map(shipment -> {
                 List<ShipmentItem> shipItms = shipmentItemDao.findByShipment(shipment);
-                return ShipmentModel.map(shipment, shipItms);
+                List<ShipmentItemModel> shipItmModels = new ArrayList<>();
+                for (ShipmentItem shipItem : shipItms) {
+                    shipItmModels.add(ShipmentItemModel.map(shipItem, getShipmentItemProperties(shipItem)));
+                }
+
+                return ShipmentModel.map(shipment, shipItmModels);
             }).getContent();
 
             return Util.getResponse(ships, shipResponses);
@@ -174,14 +199,13 @@ public class ShipmentServiceImpl implements ShipmentService {
         for (Integer shipmentId : uniqueShipmentIds) {
 
             Shipment shipment = shipmentDao.findByIdAndDateDeletedIsNull(shipmentId);
-            List<ShipmentItem> shipItms = new ArrayList<>();
-                for (ShipmentItem shipItem : shipmentItems) {
-                    if (shipment.getId() == shipItem.getShipment().getId()) {
-                        shipItms.add(shipItem);
-                    }
-
+            List<ShipmentItemModel> shipItmModels = new ArrayList<>();
+            for (ShipmentItem shipItem : shipmentItems) {
+                if (shipment.getId() == shipItem.getShipment().getId()) {
+                    shipItmModels.add(ShipmentItemModel.map(shipItem, getShipmentItemProperties(shipItem)));
+                }
             }
-            shipments.add(ShipmentModel.map(shipment, shipItms));
+            shipments.add(ShipmentModel.map(shipment, shipItmModels));
         }
         //List for security agents retailer
 
@@ -225,14 +249,23 @@ public class ShipmentServiceImpl implements ShipmentService {
             shipmentItems = shipmentItemDao.findAll();
         }
 
-        List<ShipmentItem> shipItms = new ArrayList<>();
+//        List<ShipmentItem> shipItms = new ArrayList<>();
+//        for (ShipmentItem shipItem : shipmentItems) {
+//            if (shipment.getId() == shipItem.getShipment().getId()) {
+//                shipItms.add(shipItem);
+//            }
+//        }
+        
+        List<ShipmentItemModel> shipItmModels = new ArrayList<>();
         for (ShipmentItem shipItem : shipmentItems) {
-            if (shipment.getId() == shipItem.getShipment().getId()) {
-                shipItms.add(shipItem);
+            if (shipment.getId() == shipItem.getShipment().getId()) {          
+                shipItmModels.add(ShipmentItemModel.map(shipItem, getShipmentItemProperties(shipItem)));
             }
         }
+        
+        
 
-        return new SingleItemResponse(Response.SUCCESS.status(), ShipmentModel.map(shipment, shipItms));
+        return new SingleItemResponse(Response.SUCCESS.status(), ShipmentModel.map(shipment, shipItmModels));
     }
 
     // Asign traspoorter to a shipemnt
@@ -285,6 +318,39 @@ public class ShipmentServiceImpl implements ShipmentService {
         shipmentDao.save(shipment);
         return new SingleItemResponse(Response.SUCCESS.status(), new ItemName(shipment.getId(), null));
 
+    }
+    
+    public List<PropertyValuesModel> getShipmentItemProperties(ShipmentItem  shipmentItem) {
+       
+        List<OrderItemPropertyValue> orderItemProperties = orderItemPropertyValueDao.findByOrderItem(shipmentItem.getOrderItem().getId());
+
+        List<Integer> propertyValueIds = new ArrayList<>();
+        for (OrderItemPropertyValue ppv : orderItemProperties) {
+            propertyValueIds.add(ppv.getPropertyValue());
+        }
+      
+        return getPropertyValues(propertyValueIds);
+    }
+    
+    public  List<PropertyValuesModel> getPropertyValues(List<Integer> propertyValueIds) {
+        ListMultimap<String, ItemValue> propertyValues = ArrayListMultimap.create();
+        for (Integer pvid : propertyValueIds) {
+            PropertyValue pValue = propertyValueDao.getOne(pvid);
+            propertyValues.put(pValue.getProperty().getName(), new ItemValue(pValue.getId(), pValue.getValue()));
+        }
+        // log.info("Key values" + propertyValues);
+        List<PropertyValuesModel> propertyValuesModel = new ArrayList<>();
+        // log.info("Key values" + propertyValues);
+        for (String property : propertyValues.keySet()) {
+            List<ItemValue> values = propertyValues.get(property);
+            PropertyValuesModel model = new PropertyValuesModel();
+            model.setProperty(property.toLowerCase());
+            model.setValues(values);
+            //  log.info("Key" + property);
+            // log.info("Key" + values);
+            propertyValuesModel.add(model);
+        }
+        return propertyValuesModel;
     }
 
 }

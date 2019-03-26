@@ -21,5 +21,5 @@ public interface VehicleDao extends JpaRepository<Vehicle, Integer>{
     @Query(value="SELECT v FROM Vehicle v WHERE v.id = :id")
     Vehicle findOne(@Param("id")Integer id);
     boolean existsByRegistrationNo(String regNo);
-    Page<Vehicle>findByTransporterAndDateDeletedIsNull(Transporter transporter, Pageable pageable);
+    Page<Vehicle>findByTransporterAndDateDeletedIsNullAndDriverIsNotNull(Transporter transporter, Pageable pageable);
 }

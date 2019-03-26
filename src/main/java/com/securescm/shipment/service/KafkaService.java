@@ -7,6 +7,8 @@ package com.securescm.shipment.service;
 
 import com.securescm.shipment.kafka.models.OrderItemModel;
 import com.securescm.shipment.kafka.models.ProductModel;
+import com.securescm.shipment.kafka.models.PropertyModel;
+import com.securescm.shipment.kafka.models.PropertyValueModel;
 import com.securescm.shipment.kafka.models.ProviderModel;
 import com.securescm.shipment.model.RetailerModel;
 import com.securescm.shipment.model.Status;
@@ -26,4 +28,10 @@ public interface KafkaService {
     
     public Status createUpdateRetailer(RetailerModel model);
     public Status deleteRetailer(RetailerModel model);
+    
+    public Status createUpdateProperty(PropertyModel model);
+    public Status deleteProperty(PropertyModel model);
+    
+    public Status createUpdatePropertyValue(PropertyValueModel model);
+    public Status deletePropertyValue(PropertyValueModel model);
 }

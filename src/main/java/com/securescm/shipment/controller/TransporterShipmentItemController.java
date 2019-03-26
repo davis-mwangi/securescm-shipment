@@ -8,6 +8,7 @@ package com.securescm.shipment.controller;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.TransporterShipment;
 import com.securescm.shipment.entities.TransporterShipmentItem;
+import com.securescm.shipment.model.TransporterShipmentItemModel;
 import com.securescm.shipment.payload.AssignTransporterItemStoreRequest;
 import com.securescm.shipment.payload.AuditTransporterItemRequest;
 import com.securescm.shipment.payload.SecurityCheckRequest;
@@ -56,7 +57,7 @@ public class TransporterShipmentItemController {
     private TransporterShipmentDao transporterShipmentDao;
     
     @PostMapping
-    public ResponseEntity createTransporterShipment(@RequestBody TransporterShipmentItemRequest request,
+    public ResponseEntity createTransporterShipmentItem(@RequestBody TransporterShipmentItemRequest request,
             @CurrentUser ApiPrincipal principal){
         TransporterShipment transporterShipment = transporterShipmentDao.getOne(request.getTransporterShipment());
         if(transporterShipment.getStatus().getId() != 1){
@@ -88,7 +89,7 @@ public class TransporterShipmentItemController {
              
            
            return  Util.getResponse(Response.SUCCESS.status(), Util.getResponse(transportItems, transportItems.map(transportItem -> {
-                    return  transportItems;
+                    return  TransporterShipmentItemModel.map(transportItem,service.getTransporterItemProperties(transportItem));
                 }).getContent())); 
     
     }
@@ -134,6 +135,5 @@ public class TransporterShipmentItemController {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body( new SingleItemResponse(Response.TRANSPORTER_SHIPEMENT_ITEM_EXCEEDED.status(), null));
         }
         return ResponseEntity.ok().body(service.assignTransporterShipmentItemToStore(request, apiPrincipal.getUser()));
-
     }
 }

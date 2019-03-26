@@ -742,7 +742,123 @@ databaseChangeLog:
             onDelete: NO ACTION
             onUpdate: NO ACTION
             referencedColumnNames: id
-            referencedTableName: retailer      
+            referencedTableName: retailer 
             
+ - changeSet:
+      id: 112
+      author: David
+      runOnChange: true
+      changes:
+        - createTable:
+            tableName: property
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(100)
+              - column:
+                  name: name
+                  type: varchar(100)
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_deleted
+                  type: datetime(6)
+                  
+ - changeSet:
+      id: 113
+      author: David
+      runOnChange: true
+      changes:
+        - createTable:
+            tableName: property_value
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: property
+                  type: int
+              - column:
+                  name: value
+                  type: varchar(100)
+              - column:
+                  name: code
+                  type: varchar(100)    
+              - column:
+                  name: date_created
+                  type: datetime(6)
+              - column:
+                  name: date_deleted
+                  type: datetime(6) 
+ - changeSet:
+      id: 114
+      author: David
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: property
+            baseTableName: property_value
+            constraintName: fk_property_value_property
+            deferrable: false
+            initiallyDeferred: false
+            onDelete: NO ACTION
+            onUpdate: NO ACTION
+            referencedColumnNames: id
+            referencedTableName: property   
+            
+ - changeSet:
+      id: 115
+      author: David
+      runOnChange: true
+      changes:
+        - createTable:
+            tableName: order_item_property_value
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: property_value
+                  type: int
+              - column:
+                  name: order_item
+                  type: int
+ - changeSet:
+      id: 116
+      author: David
+      changes:
+      - addColumn:
+            catalogName: 
+            columns:
+            - column:
+                name: order
+                type: int
+            schemaName:
+            tableName:   order_item_property_value   
+ - changeSet:
+      id: 117
+      author: David
+      changes:
+        - renameColumn:
+            tableName: order_item_property_value
+            columnDataType: int
+            newColumnName: order_id
+            oldColumnName: order          
+              
                           
             

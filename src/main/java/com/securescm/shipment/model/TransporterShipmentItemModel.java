@@ -7,6 +7,8 @@ package com.securescm.shipment.model;
 
 import com.securescm.shipment.entities.TransporterShipmentItem;
 import com.securescm.shipment.entities.TransporterShipmentItemStatus;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,14 +27,14 @@ public class TransporterShipmentItemModel {
     private double quantity;
     private TransporterShipmentItemStatus status;
     
-    public static TransporterShipmentItemModel map(TransporterShipmentItem tsi){
+    public static TransporterShipmentItemModel map(TransporterShipmentItem tsi,  List<PropertyValuesModel>properties){
         TransporterShipmentItemModel model =  new TransporterShipmentItemModel();
         model.setId(tsi.getId());
         model.setQuantity(tsi.getQuantity());
         model.setShipment(new ItemName(
                 tsi.getShipment().getId(),
                 tsi.getShipment().getName()));
-        model.setShipmentItem(ShipmentItemModel.map(tsi.getShipmentItem()));
+        model.setShipmentItem(ShipmentItemModel.map(tsi.getShipmentItem(), properties));
         model.setStatus(tsi.getStatus());
     return model;   
     }

@@ -58,7 +58,7 @@ public class VehicleController {
             @RequestParam(value = "size", defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int size,
             @CurrentUser ApiPrincipal principal) {
           
-           Page<Vehicle> vehicles = vehicleDao.findByTransporterAndDateDeletedIsNull(
+           Page<Vehicle> vehicles = vehicleDao.findByTransporterAndDateDeletedIsNullAndDriverIsNotNull(
                      new Transporter(principal.getUser().getStakeholder().getId()),
                 Util.getPageable(page,size,direction,orderBy));
            

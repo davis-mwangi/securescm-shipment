@@ -8,6 +8,7 @@ package com.securescm.shipment.model;
 import com.securescm.shipment.entities.TransporterShipment;
 import com.securescm.shipment.entities.TransporterShipmentItem;
 import com.securescm.shipment.entities.TransporterShipmentStatus;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -30,7 +31,7 @@ public class TransporterShipmentModel {
     private VehicleModel vehicle;
     private List<TransporterShipmentItemModel> items;
     
-    public static TransporterShipmentModel map(TransporterShipment ts, List<TransporterShipmentItem> transShipItms) {
+    public static TransporterShipmentModel map(TransporterShipment ts,List<TransporterShipmentItemModel>items) {
         TransporterShipmentModel model = new TransporterShipmentModel();
         model.setId(ts.getId());
         model.setName(ts.getName());
@@ -51,18 +52,9 @@ public class TransporterShipmentModel {
                         ts.getVehicle().getDriver().getLicenceNo(), null),
                 ts.getVehicle().getType(),
                 null));
-        List<TransporterShipmentItemModel> items = new ArrayList<>();
-        if (transShipItms != null) {
-            for (TransporterShipmentItem item : transShipItms) {
-                TransporterShipmentItemModel itModel = new TransporterShipmentItemModel();
-                itModel.setId(item.getId());
-                itModel.setQuantity(item.getQuantity());
-                itModel.setShipmentItem(ShipmentItemModel.map(item.getShipmentItem()));
-                itModel.setShipment(new ItemName(item.getShipment().getId(), item.getShipment().getName()));
-                itModel.setStatus(item.getStatus());
-
-                items.add(itModel);
-            }
+       
+        if (items != null) {
+           
           model.setItems(items);   
         }else {
           model.setItems(null);

@@ -5,6 +5,10 @@
  */
 package com.securescm.shipment.service.Impl;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.securescm.shipment.entities.OrderItemPropertyValue;
+import com.securescm.shipment.entities.PropertyValue;
 import com.securescm.shipment.entities.Shipment;
 import com.securescm.shipment.entities.ShipmentItem;
 import com.securescm.shipment.entities.ShipmentItemStatus;
@@ -18,7 +22,9 @@ import com.securescm.shipment.entities.Vehicle;
 import com.securescm.shipment.kafka.MessageProducer;
 import com.securescm.shipment.kafka.models.Inventory;
 import com.securescm.shipment.kafka.models.ProducerEvent;
+import com.securescm.shipment.kafka.models.PropertyValuesModel;
 import com.securescm.shipment.model.ItemName;
+import com.securescm.shipment.model.ItemValue;
 import com.securescm.shipment.model.Status;
 import com.securescm.shipment.model.TransporterShipmentItemModel;
 import com.securescm.shipment.model.TransporterShipmentModel;
@@ -27,6 +33,9 @@ import com.securescm.shipment.payload.AssignTransporterItemStoreRequest;
 import com.securescm.shipment.payload.AuditTransporterItemRequest;
 import com.securescm.shipment.payload.TransporterShipmentItemRequest;
 import com.securescm.shipment.payload.TransporterShipmentRequest;
+import com.securescm.shipment.repos.OrderItemPropertyValueDao;
+import com.securescm.shipment.repos.PropertyDao;
+import com.securescm.shipment.repos.PropertyValueDao;
 import com.securescm.shipment.repos.ShipmentDao;
 import com.securescm.shipment.repos.ShipmentItemDao;
 import com.securescm.shipment.repos.TransporterShipmentDao;
@@ -78,6 +87,17 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
     
     @Autowired
     private MessageProducer producer;
+    
+    @Autowired
+    private PropertyDao propertyDao;
+    
+    @Autowired
+    private PropertyValueDao propertyValueDao;
+    
+    @Autowired
+    private OrderItemPropertyValueDao orderItemPropertyValueDao;
+    
+    
     
      
     @Value(value = "${topic.inventory}")
@@ -140,9 +160,13 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         TransporterShipment shipment = transporterShipmentDao.getOne(id);
 
         List<TransporterShipmentItem> transShipItms = transporterShipmentItemDao.findByTransporterShipment(shipment);
+        List<TransporterShipmentItemModel>transShipItemModel =  new ArrayList<>();
+        for(TransporterShipmentItem tsi: transShipItms ){
+            transShipItemModel.add(TransporterShipmentItemModel.map(tsi, getTransporterItemProperties(tsi)));
+        }
        
 
-        return new SingleItemResponse(Response.SUCCESS.status(), TransporterShipmentModel.map(shipment, transShipItms));
+        return new SingleItemResponse(Response.SUCCESS.status(), TransporterShipmentModel.map(shipment, transShipItemModel));
     }
 
     
@@ -268,8 +292,8 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
 
     @Override
     public SingleItemResponse findTransporterShipmentItem(Integer id) {
-       TransporterShipmentItem shipmentItem = transporterShipmentItemDao.getOne(id);  
-       return new SingleItemResponse(Response.TRANSPORTER_SHIPEMENT_ITEM_NOT_FOUND.status(),shipmentItem);
+       TransporterShipmentItem tsi = transporterShipmentItemDao.getOne(id);  
+       return new SingleItemResponse(Response.TRANSPORTER_SHIPEMENT_ITEM_NOT_FOUND.status(),TransporterShipmentItemModel.map(tsi,getTransporterItemProperties(tsi)));
     }
     
     @Override
@@ -444,14 +468,21 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         if (userModel.getRole().getName().equalsIgnoreCase("Retailer")
                 && userModel.getStakeholder().getType().getName().equalsIgnoreCase("Retailer")) {
             Page<TransporterShipmentItem> transporterShipItems = transporterShipmentItemDao.findByRetailerAndStatus(userModel.getStakeholder().getId(), pageable);
-            return Util.getResponse(transporterShipItems, transporterShipItems.map(ts -> {
-                return TransporterShipmentItemModel.map(ts);
+            return Util.getResponse(transporterShipItems, transporterShipItems.map(tsi -> {
+                
+                return TransporterShipmentItemModel.map(tsi,getTransporterItemProperties(tsi) );
             }).getContent());
         }
 
         //log.info(transporterShips.toString());
         return Util.getResponse(transporterShips, transporterShips.map(ts -> {
-            return TransporterShipmentModel.map(ts, null);
+            List<TransporterShipmentItem> transShipItms = transporterShipmentItemDao.findByTransporterShipment(ts);
+            List<TransporterShipmentItemModel> transShipItemModel = new ArrayList<>();
+            for (TransporterShipmentItem tsi : transShipItms) {
+                transShipItemModel.add(TransporterShipmentItemModel.map(tsi, getTransporterItemProperties(tsi)));
+            }
+
+            return TransporterShipmentModel.map(ts, transShipItemModel);
         }).getContent());
 
     }
@@ -494,6 +525,43 @@ public class TransporterShipmentServiceImpl implements TransporterShipmentServic
         log.info("Provider: " + tShipmentItem.getShipmentItem().getProvider().getId() + "Store:"+request.getStore()+ ", Retailer: "+ tShipmentItem.getRetailer().getId()+ ", Product:"+tShipmentItem.getShipmentItem().getProduct().getId() + ", Quantity :" + storeQuantity);
         return new SingleItemResponse(Response.SUCCESS.status(), new ItemName(tShipmentItem.getId())); 
      }
+
+     
+    @Override
+     public List<PropertyValuesModel> getTransporterItemProperties(TransporterShipmentItem  transporterShipmentItem) {
+        
+        ShipmentItem shipmentItem = shipmentItemDao.getOneShipmentItem(transporterShipmentItem.getShipmentItem().getId());
+        
+        List<OrderItemPropertyValue> orderItemProperties = orderItemPropertyValueDao.findByOrderItem(shipmentItem.getOrderItem().getId());
+
+        List<Integer> propertyValueIds = new ArrayList<>();
+        for (OrderItemPropertyValue ppv : orderItemProperties) {
+            propertyValueIds.add(ppv.getPropertyValue());
+        }
+      
+        return getPropertyValues(propertyValueIds);
+    }
+     
+     public  List<PropertyValuesModel> getPropertyValues(List<Integer> propertyValueIds) {
+        ListMultimap<String, ItemValue> propertyValues = ArrayListMultimap.create();
+        for (Integer pvid : propertyValueIds) {
+            PropertyValue pValue = propertyValueDao.getOne(pvid);
+            propertyValues.put(pValue.getProperty().getName(), new ItemValue(pValue.getId(), pValue.getValue()));
+        }
+        // log.info("Key values" + propertyValues);
+        List<PropertyValuesModel> propertyValuesModel = new ArrayList<>();
+        // log.info("Key values" + propertyValues);
+        for (String property : propertyValues.keySet()) {
+            List<ItemValue> values = propertyValues.get(property);
+            PropertyValuesModel model = new PropertyValuesModel();
+            model.setProperty(property.toLowerCase());
+            model.setValues(values);
+            //  log.info("Key" + property);
+            // log.info("Key" + values);
+            propertyValuesModel.add(model);
+        }
+        return propertyValuesModel;
+    }
     
     
 }
